@@ -23,7 +23,7 @@ LIBDIR?=$(EXEC_PREFIX)/lib
 CFLAGS:=$(CFLAGS) -Wall -Wextra -fbuiltin
 CPPFLAGS:=$(CPPFLAGS) -D__is_missy_libc -Iinclude
 LIBK_CFLAGS:=$(CFLAGS) -ffreestanding
-LIBK_CPPFLAGS:=$(CPPFLAGS) -D__is_missy_kernel -D__arch_i386 -I../kernel/arch
+LIBK_CPPFLAGS:=$(CPPFLAGS) -D__is_missy_kernel -D__arch_i386 -I../kernel/include -I../kernel/arch -I../kernel/kernel
 
 ARCHDIR:=arch/$(HOSTARCH)
 

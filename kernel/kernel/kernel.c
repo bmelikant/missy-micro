@@ -32,17 +32,17 @@
 #include <stdint.h>
 #include <string.h>
 
-// kernel public includes
+// kernel public includes (needed by / contained in libk)
 #include <kernel/tty.h>
+#include <kernel/memory.h>
 
-// kernel public includes (needed by libc)
-#include "device/cpu.h"
-#include "etc/elf32.h"
-#include "etc/exception.h"
-#include "etc/multiboot.h"
-#include "etc/splashlogo.h"
-#include "sys/syscall.h"
-#include "memory/memory.h"
+// kernel includes
+#include <device/cpu/cpu.h>
+#include <etc/elf32.h>
+#include <etc/exception.h>
+#include <etc/multiboot.h>
+#include <etc/splashlogo.h>
+#include <kernel/syscall.h>
 
 // function prototypes
 void kernel_panic 					(const char *err);

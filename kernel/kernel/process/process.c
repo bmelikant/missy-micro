@@ -6,7 +6,7 @@
  */
 
 // std includes
-#include <sys/proccess.h>
+#include <kernel/process.h>
 
 #include <stdio.h>
 #include <stdlib.h>

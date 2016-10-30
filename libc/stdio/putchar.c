@@ -6,7 +6,7 @@
  */
 
 #ifdef __is_missy_kernel
-#include <kernel/vga_tty.h>
+#include <kernel/tty.h>
 #endif
 
 #include <stdio.h>

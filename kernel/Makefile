@@ -21,7 +21,7 @@ BOOTDIR?=$(EXEC_PREFIX)/boot
 INCLUDEDIR?=$(PREFIX)/include
 
 CFLAGS:=$(CFLAGS) -ffreestanding -fbuiltin -Wall -Wextra
-CPPFLAGS:=$(CPPFLAGS) -D__is_missy_kernel -DDEBUG_BUILD -D__build_i386 -Iinclude
+CPPFLAGS:=$(CPPFLAGS) -D__is_missy_kernel -DDEBUG_BUILD -D__build_i386 -Iinclude -Iarch -Ikernel
 LDFLAGS:=$(LDFLAGS)
 LIBS:=$(LIBS) -nostdlib -lk -lgcc
 
@@ -35,11 +35,11 @@ LDFLAGS:=$(LDFLAGS) $(KERNEL_ARCH_LDFLAGS)
 LIBS:=$(LIBS) $(KERNEL_ARCH_LIBS)
 
 KERNEL_OBJS:=\
-kernel/proc/memory.o \
-kernel/proc/process.o \
-kernel/proc/syscall.o \
-kernel/splashlogo.o \
-kernel/kalloc.o \
+kernel/memory/kalloc.o \
+kernel/memory/memory.o \
+kernel/process/process.o \
+kernel/process/syscall.o \
+kernel/etc/splashlogo.o \
 kernel/kernel.o
 
 OBJS:=\

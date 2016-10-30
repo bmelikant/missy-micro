@@ -4,11 +4,7 @@
  *	Created 8/14/16 Ben Melikant
  */
 
-#include <stdio.h>
-
-#ifdef __is_missy_kernel
-#include <kernel/dev/vga_tty.h>
-#endif
+#include <kernel/tty.h>
 
 void splash_logo (void) {
 

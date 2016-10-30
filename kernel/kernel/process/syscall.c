@@ -6,13 +6,14 @@
  *      Author: bmelikant
  */
 
-#include "../../include/kernel/syscall.h"
+#include <kernel/syscall.h>
 
 #ifdef __build_i386
-#include <arch/i386/i386_cpu/i386_cpu.h>
+#include <i386/i386_cpu/i386_cpu.h>
 #endif
 
 #define SYSCALL_MAX 256
+typedef long (*system_call)(void);
 
 // system call table
 system_call syscall_table[SYSCALL_MAX];

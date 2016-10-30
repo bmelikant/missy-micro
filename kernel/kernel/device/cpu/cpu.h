@@ -19,7 +19,7 @@
 
 // architecture-specific includes / defines
 #ifdef __arch_i386
-#include <arch/i386/i386_cpu/i386_cpu.h>
+#include <i386/i386_cpu/i386_cpu.h>
 #endif
 
 #endif /* KERNEL_CPU_CPU_H_ */
