@@ -17,6 +17,11 @@ extern int errno;
 #define EILSEQ		0x00000002
 #define ERANGE		0x00000003
 #define ENOMEM		0x00000004
+#define ENXIO		0x00000005
+#define ENOBUFS		0x00000006
+#define EMFILE		0x00000007
+#define ENODEV		0x00000008
+#define ENOSYS		0x00000009
 
 #ifdef _cplusplus
 }

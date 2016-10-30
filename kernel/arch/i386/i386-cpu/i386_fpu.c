@@ -7,7 +7,7 @@
  */
 
 // standard includes
-#include "i386_fpu.h"
+#include "../i386-cpu/i386_fpu.h"
 
 #include <cpuid.h>
 

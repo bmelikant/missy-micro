@@ -35,6 +35,7 @@ LDFLAGS:=$(LDFLAGS) $(KERNEL_ARCH_LDFLAGS)
 LIBS:=$(LIBS) $(KERNEL_ARCH_LIBS)
 
 KERNEL_OBJS:=\
+kernel/device/device.o \
 kernel/memory/kalloc.o \
 kernel/memory/memory.o \
 kernel/process/process.o \
@@ -46,10 +47,10 @@ OBJS:=\
 $(KERNEL_ARCH_OBJS) \
 $(KERNEL_OBJS)
 
-CRTI_OBJ:=$(ARCHDIR)/asm/crti.o
+CRTI_OBJ:=$(ARCHDIR)/asm/init/crti.o
 CRTBEGIN_OBJ:=$(shell $(CC) $(CFLAGS) $(LDFLAGS) -print-file-name=crtbegin.o)
 CRTEND_OBJ:=$(shell $(CC) $(CFLAGS) $(LDFLAGS) -print-file-name=crtend.o)
-CRTN_OBJ:=$(ARCHDIR)/asm/crtn.o
+CRTN_OBJ:=$(ARCHDIR)/asm/init/crtn.o
 
 ALL_MY_OBJS:=\
 $(CRTI_OBJ) \

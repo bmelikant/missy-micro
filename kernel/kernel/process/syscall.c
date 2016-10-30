@@ -9,7 +9,7 @@
 #include <kernel/syscall.h>
 
 #ifdef __build_i386
-#include <i386/i386_cpu/i386_cpu.h>
+#include <i386/i386-cpu/i386_cpu.h>
 #endif
 
 #define SYSCALL_MAX 256

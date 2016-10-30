@@ -40,7 +40,8 @@ string/memcpy.o \
 string/memset.o \
 string/itoa_s.o \
 string/strtol.o \
-string/strlen.o
+string/strlen.o \
+string/strcpy.o
 
 STDIOHDROBJS:=\
 stdio/putchar.o \

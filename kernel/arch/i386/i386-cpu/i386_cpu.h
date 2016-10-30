@@ -32,6 +32,9 @@ int		cpu_restore_state	(cpu_state *ps);				// restore the state of the processor
 void 	cpu_reset			();								// reset the system
 void  	cpu_setvector		(int vector, void *addr);		// set a CPU interrupt to point to a new function
 
+void cpu_enable_irq 	(int irq);
+void cpu_disable_irq 	(int irq);
+
 #define cpu_interrupt(x)	__asm__("int %0\n" :: "N"((x)) : "cc", "memory")
 #define cpu_enable()  		__asm__("sti")
 #define cpu_disable() 		__asm__("cli")

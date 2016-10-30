@@ -11,11 +11,12 @@ extern "C" {
 
 void 	*memcpy 	(void *dst, const void *src, size_t count);
 void 	*memmove 	(void *dst, const void *src, size_t count);
-int	memcmp		(const void *s1, const void *s2, size_t count);
+int		 memcmp		(const void *s1, const void *s2, size_t count);
 void	*memset		(void *blk, int val, size_t count);
 
 // String function prototypes
 size_t strlen (const char *s);
+char *strncpy (char *dst, const char *src, size_t bytes);
 
 // conversion functions
 char 	*itoa_s (char *str, unsigned int number, int base);

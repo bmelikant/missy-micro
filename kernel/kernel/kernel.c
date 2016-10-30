@@ -31,17 +31,22 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <string.h>
+#include <errno.h>
 
 // kernel public includes (needed by / contained in libk)
 #include <kernel/tty.h>
 #include <kernel/memory.h>
 
 // kernel includes
+#include <device/device.h>
 #include <device/cpu/cpu.h>
+#include <device/timer/timer.h>
+
 #include <etc/elf32.h>
 #include <etc/exception.h>
 #include <etc/multiboot.h>
 #include <etc/splashlogo.h>
+
 #include <kernel/syscall.h>
 
 // function prototypes
@@ -64,14 +69,27 @@ void kernel_main () {
 	terminal_clrscr ();
 	splash_logo ();
 
-	// install the test system call
-	install_syscall (0x01, &testcall);
+	// initialize the device driver interface
+	device_list_init ();
 
-	// generate a test system call
-	__asm__ ("movl $0x01,%eax");
-	__asm__ ("int $0x80");
+	// start the timer driver
+	int timer_major = timer_initialize ();
+	timer_start (100);
 
-	// begin initializing devices
+	while (true) {
+
+		// try to read from the timer, should be zero
+		int timer_test = 0;
+
+		if (chrdev_read (timer_major, (char *)&timer_test, sizeof (int)) == -1) {
+
+			printf ("Errno value: %x\n", errno);
+			kernel_panic ("Could not read from character device /dev/timer!");
+		}
+
+		// print the integer that we received
+		terminal_printf ("I received the value %d from the timer.\n", timer_test);
+	}
 
 	for (;;);
 	__builtin_unreachable ();

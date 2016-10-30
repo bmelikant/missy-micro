@@ -6,10 +6,10 @@
 
 // includes
 
-#include "i386_pic.h"
+#include "../pic-8259/i386_pic.h"
 
-#include "../i386_cpu/i386_cpu.h"
-#include "../i386_cpu/i386_descriptor.h"
+#include "../i386-cpu/i386_cpu.h"
+#include "../i386-cpu/i386_descriptor.h"
 
 // Constant definitions
 
@@ -109,7 +109,7 @@ void i386_pic_mask_irq (uint8_t irq) {
                 irq -= 8;
         }
 
-        irq_mask = inportb ((port) | (1 << irq));
+        irq_mask = inportb (port) | (1 << irq);
         outportb (port, irq_mask);
 }
 

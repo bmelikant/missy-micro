@@ -19,10 +19,10 @@
 #include <string.h>
 
 // include local headers
-#include "i386_cpu.h"
-#include "i386_fpu.h"
-#include "i386_descriptor.h"
-#include "../pic_8259/i386_pic.h"
+#include "../i386-cpu/i386_cpu.h"
+#include "../i386-cpu/i386_fpu.h"
+#include "../i386-cpu/i386_descriptor.h"
+#include "../pic-8259/i386_pic.h"
 
 // internal variables
 struct gdtr 	_gdtr;
@@ -54,7 +54,6 @@ extern void __attribute__((cdecl)) x86_machinecheck             (void);
 extern void __attribute__((cdecl)) x86_simdexception            (void);
 extern void __attribute__((cdecl)) x86_virtualizeexception      (void);
 extern void __attribute__((cdecl)) x86_securityexception        (void);
-extern void __attribute__((cdecl)) system_call					(void);
 
 /* Interface functions */
 
@@ -88,12 +87,8 @@ int cpu_init () {
     i386_idt_setvector (0x14, (uint32_t)(&x86_virtualizeexception), 0x08, (uint8_t) (I386_IDT_INTERRUPTGATE_32 | I386_IDT_PRESENT | I386_IDT_RING0));
     i386_idt_setvector (0x1E, (uint32_t)(&x86_securityexception), 0x08, (uint8_t) (I386_IDT_INTERRUPTGATE_32 | I386_IDT_PRESENT | I386_IDT_RING0));
 
-    // install the system call handler
-    i386_idt_setvector (0x80, (uint32_t)(&system_call), 0x08, (uint8_t)(I386_IDT_INTERRUPTGATE_32 | I386_IDT_PRESENT | I386_IDT_RING0));
-
     // set up the interrupt controller and timer
     i386_pic_initialize (0x20, 0x28);
-    i386_pic_mask_irq (I386_PIC_IRQ1);
 
     // try to start the floating point unit
 
@@ -166,6 +161,9 @@ void cpu_setvector (int vector, void *addr) {
 
 	i386_idt_setvector ((uint8_t) vector, (uint32_t)(addr), 0x08, (uint8_t) (I386_IDT_INTERRUPTGATE_32 | I386_IDT_PRESENT | I386_IDT_RING0));
 }
+
+void cpu_enable_irq (int irq) { i386_pic_unmask_irq ((uint8_t) irq); }
+void cpu_disable_irq (int irq) { i386_pic_mask_irq ((uint8_t) irq); }
 
 // i386_gdt_install (): Install the GDT into the GDTR
 void i386_gdt_install (uint16_t codeseg, uint16_t dataseg) {
