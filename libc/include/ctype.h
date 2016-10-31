@@ -20,11 +20,13 @@ extern char _ctype[];
 
 /* ctype macros */
 
-#define isalnum(c)	((_ctype+1)[(unsigned)c] & (CT_UP | CT_LOW | CT_DIG))
-#define isalpha(c)	((_ctype+1)[(unsigned)c] & (CT_UP | CT_LOW))
 #define iscntrl(c)	((_ctype+1)[(unsigned)c] & (CT_CTL))
-#define isdigit(c)	((_ctype+1)[(unsigned)c] & (CT_DIG))
-#define isspace(c)	((_ctype+1)[(unsigned)c] & (CT_WHT))
+
+int isalpha(int c);
+int isdigit(int c);
+int isalnum(int c);
+int isspace(int c);
+int isupper(int c);
 
 #ifdef _cplusplus
 }

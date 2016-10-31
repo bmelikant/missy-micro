@@ -107,3 +107,25 @@ ssize_t chrdev_read (int major, char *buf, size_t length) {
 		return -1;
 	}
 }
+
+// ssize_t chrdev_write (): Write to the requested character device
+ssize_t chrdev_write (int major, char *buf, size_t length) {
+
+	// call the device driver if it exists
+	if (char_devices[major].allocated && char_devices[major].chrdev_fns->write_chrdev != NULL)
+		return char_devices[major].chrdev_fns->write_chrdev(buf, length);
+
+	// if the device is allocated but doesn't implement the function, send ENOSYS
+	else if (char_devices[major].allocated) {
+
+		errno = ENOSYS;
+		return -1;
+	}
+
+	// if the device is unallocated, send ENODEV
+	else {
+
+		errno = ENODEV;
+		return -1;
+	}
+}

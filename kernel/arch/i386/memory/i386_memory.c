@@ -11,7 +11,10 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <errno.h>
-#include "../../../kernel/etc/multiboot.h"
+
+#include <etc/multiboot.h>
+
+#include <kernel/tty.h>
 
 #include "block_alloc.h"
 #include "virtual_mm.h"

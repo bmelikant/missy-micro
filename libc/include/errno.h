@@ -22,6 +22,7 @@ extern int errno;
 #define EMFILE		0x00000007
 #define ENODEV		0x00000008
 #define ENOSYS		0x00000009
+#define EINVAL		0x00000010
 
 #ifdef _cplusplus
 }

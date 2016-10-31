@@ -16,12 +16,12 @@ void	*memset		(void *blk, int val, size_t count);
 
 // String function prototypes
 size_t strlen (const char *s);
-char *strncpy (char *dst, const char *src, size_t bytes);
 
-// conversion functions
-char 	*itoa_s (char *str, unsigned int number, int base);
-int	atoi 	(const char *numstr);
-long	strtol	(const char *num, char **endptr, int base);
+int strcmp  (const char *s1, const char *s2);
+int strncmp (const char *s1, const char *s2, size_t len);
+
+char *strcpy  (char *dst, const char *src);
+char *strncpy (char *dst, const char *src, size_t bytes);
 
 #ifdef _cplusplus
 }

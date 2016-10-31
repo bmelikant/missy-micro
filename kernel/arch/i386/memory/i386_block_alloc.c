@@ -48,7 +48,7 @@ static unsigned int block_alloc_first_free_n	(size_t n);
 /* block allocation interface functions */
 
 // unsigned int balloc_initialize (): initialize the block allocator
-// inputs: mem_sz - the size of physicall memory in bytes, kernel_sz, size of the kernel
+// inputs: mem_sz - the size of physical memory in bytes, kernel_sz, size of the kernel
 // returns: 0 on error, block count on success
 unsigned int balloc_initialize (unsigned int memory_sz) {
 
@@ -58,7 +58,13 @@ unsigned int balloc_initialize (unsigned int memory_sz) {
 
 	// place the memory bitmap at the end of the kernel
 	mem_sz = memory_sz;
-	m_bmp = (unsigned int *)(kernel_start + kernel_sz);
+	m_bmp = ((unsigned int *)(&kernel_start)) + kernel_sz;
+
+	printf ("Physical memory size: %d\n", memory_sz/1024);
+	printf ("The kernel starts at 0x%x and ends at 0x%x\n", (unsigned int)&kernel_start, (unsigned int)&kernel_end);
+	printf ("Ok, the kernel_start symbol content is 0x%x\n", (unsigned int) kernel_start);
+	printf ("Kernel size reported as %d\n", kernel_sz);
+	printf ("Memory address for m_bmp is 0x%x\n", (unsigned int) m_bmp);
 
 	// set up the number of blocks in the system
 	total_blocks = (unsigned int)(memory_sz / MEMORY_BLOCK_SIZE);

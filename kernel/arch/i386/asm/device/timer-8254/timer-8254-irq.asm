@@ -10,10 +10,6 @@ align 4
 
 %define IRQ_TIMER_8254 0x01
 
-; functions needed by the callback
-[extern i386_pic_send_eoi]
-[extern terminal_printf]
-
 [global timer_8254_irq]
 timer_8254_irq:
 

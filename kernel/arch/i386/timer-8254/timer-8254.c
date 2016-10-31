@@ -8,12 +8,17 @@
 
 #include <errno.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdint.h>
 
 #include <device/device.h>
 #include <device/cpu/cpu.h>
 #include <device/timer/timer.h>
 
-#include <stdint.h>
+#ifndef _cplusplus
+#include <stdbool.h>
+#endif
 
 #define PIT_IRQ 0x0001
 
@@ -42,6 +47,7 @@
 
 // function declarations
 ssize_t timer_read_device (char *buf, size_t length);
+ssize_t timer_write_device (char *buf, size_t length);
 
 // external (asm) data
 extern void __attribute__((cdecl)) timer_8254_irq (void);
@@ -50,9 +56,11 @@ extern uint32_t timer_8254_count;
 // internal driver data
 static int timer_8254_major = 0;
 const char *timer_8254_name = "timer-8254";
+bool running = false;
 
 chrdev_ops timer_8254_ops = {
 		.read_chrdev = timer_read_device,
+		.write_chrdev = timer_write_device
 };
 
 // int timer_initialize (): Initialize the 8254 timer
@@ -82,14 +90,16 @@ int timer_start (int freq) {
 
 	// disable the irq for a few seconds
 	cpu_disable_irq (PIT_IRQ);
+	uint16_t interval = 0;
 
-	uint16_t interval = (uint16_t) (1193182 / freq);
+	if (freq)
+		interval = (uint16_t) (1193182 / freq);
 
 	// send initialization commands to the PIT
-	outportb (PIT_PORT_COMMAND, PIT_COUNTER_0 | PIT_LOAD_LSBFIRST | PIT_OPERATION_SQUAREWAVE | PIT_MODE_BINARY);
+	outportb (PIT_PORT_COMMAND, PIT_COUNTER_0 | PIT_LOAD_LSBFIRST | PIT_OPERATION_RATEGEN | PIT_MODE_BINARY);
 
 	// send the counter frequency to the PIT
-	outportb (PIT_PORT_COUNTER0, (uint8_t)(interval & 0xff));
+	outportb (PIT_PORT_COUNTER0, (uint8_t)(interval & 0xfe));
 	outportb (PIT_PORT_COUNTER0, (uint8_t)((interval >> 8) & 0xff));
 
 	// set the counter to zero
@@ -97,6 +107,7 @@ int timer_start (int freq) {
 
 	// re-enable the irq
 	cpu_enable_irq (PIT_IRQ);
+	running = true;
 	return 0;
 }
 
@@ -122,3 +133,33 @@ ssize_t timer_read_device (char *buf, size_t length) {
 // ssize_t timer_write_device (): Write commands to the timer
 // inputs: buf - command buffer, length - size of buffer
 // returns: # of bytes accepted (returns -1 and sets errno on failure)
+ssize_t timer_write_device (char *buf, size_t length) {
+
+	// check for spawn: command
+	if (strncmp (buf, "spawn:", strlen("spawn:")) == 0) {
+
+		if (running) {
+
+			cpu_disable_irq (PIT_IRQ);
+			printf ("Timer was running. I'm going to disable it...\n");
+		}
+
+		char timer_hz[10];
+		strncpy (timer_hz, buf+strlen("spawn:"), 10);
+
+		printf ("Received input to set a new timer: %s hertz...\n", timer_hz);
+
+		if (timer_start (strtol (timer_hz, NULL, 10)) != 0) {
+
+			errno = EINVAL;
+			return -1;
+		}
+
+		printf ("Timer set. You can now check the timer by reading /dev/timer...");
+		return length;
+	}
+
+	// if the command could not be processed, return invalid parameter
+	errno = EINVAL;
+	return -1;
+}

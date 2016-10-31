@@ -14,8 +14,17 @@ char *strncpy (char *dst, const char *src, size_t bytes) {
 
 	char *dest = dst;
 
-	for ( ; bytes > 0; bytes--)
+	for ( ; bytes > 0 && *src != '\0'; bytes--)
 		*dst++ = *src++;
+
+	while (bytes > 0) {
+
+		*dst++ = '\0';
+		bytes--;
+	}
 
 	return dest;
 }
+
+// char *strcpy (char *dst, const char *src): Copy a source string to a destination string
+char *strcpy (char *dst, const char *src) { return strncpy (dst, src, strlen (src)); }

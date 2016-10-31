@@ -38,9 +38,8 @@ STRINGHDROBJS:=\
 string/memcmp.o \
 string/memcpy.o \
 string/memset.o \
-string/itoa_s.o \
-string/strtol.o \
 string/strlen.o \
+string/strcmp.o \
 string/strcpy.o
 
 STDIOHDROBJS:=\
@@ -49,13 +48,16 @@ stdio/puts.o \
 stdio/printf.o
 
 STDLIBHDROBJS:= \
-stdlib/malloc.o
+stdlib/malloc.o \
+stdlib/itoa_s.o \
+stdlib/strtol.o
 
 FREEOBJS:=\
 $(ARCH_FREEOBJS) \
 $(STRINGHDROBJS) \
 $(STDIOHDROBJS) \
-$(STDLIBHDROBJS)
+$(STDLIBHDROBJS) \
+ctype/ctype.o
 
 HOSTEDOBJS:=\
 $(ARCH_HOSTEDOBJS)

@@ -6,6 +6,7 @@
  */
 
 #include <string.h>
+#include <stdio.h>
 #include <ctype.h>
 #include <limits.h>
 #include <errno.h>
@@ -34,8 +35,9 @@ long int strtol (const char *num, char **endptr, int base) {
 	}
 
 	// read all the whitespace off the string
-	while (isspace (*numstr++))
-		;
+	if (isspace (*numstr))
+		while (isspace (*numstr++))
+			;
 
 	// look for optional + or -
 	if (*numstr == '-') {
@@ -79,7 +81,7 @@ long int strtol (const char *num, char **endptr, int base) {
 	register int any = 0;
 
 	// start parsing out the numbers
-	while (*numstr++) {
+	while (*numstr) {
 
 		register int c = *numstr;
 
@@ -87,7 +89,7 @@ long int strtol (const char *num, char **endptr, int base) {
 		if (isdigit(c))
 			c -= '0';
 		else if (isalpha(c))
-			c -= isalpha(c) ? 'A' - 10 : 'a' - 10 ;
+			c -= isupper(c) ? 'A' - 10 : 'a' - 10 ;
 		else
 			break;
 
@@ -98,12 +100,15 @@ long int strtol (const char *num, char **endptr, int base) {
 		// make sure we aren't out of range
 		if (any < 0 || retval > cutoff || (retval == cutoff && c > cutlimit))
 			any = -1;
+
 		else {
 
 			any = 1;
 			retval *= base;
 			retval += c;
 		}
+
+		numstr++;
 	}
 
 	// if the last character was NOT consumed, return max and set error

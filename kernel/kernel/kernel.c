@@ -31,6 +31,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <string.h>
+#include <ctype.h>
 #include <errno.h>
 
 // kernel public includes (needed by / contained in libk)
@@ -74,22 +75,11 @@ void kernel_main () {
 
 	// start the timer driver
 	int timer_major = timer_initialize ();
-	timer_start (100);
+	char *timer_cmd = "spawn:20";
 
-	while (true) {
-
-		// try to read from the timer, should be zero
-		int timer_test = 0;
-
-		if (chrdev_read (timer_major, (char *)&timer_test, sizeof (int)) == -1) {
-
-			printf ("Errno value: %x\n", errno);
-			kernel_panic ("Could not read from character device /dev/timer!");
-		}
-
-		// print the integer that we received
-		terminal_printf ("I received the value %d from the timer.\n", timer_test);
-	}
+	// initialize a timer
+	if (chrdev_write (timer_major, timer_cmd, strlen(timer_cmd)) == -1)
+		printf ("Could not start timer on /dev/timer!");
 
 	for (;;);
 	__builtin_unreachable ();
