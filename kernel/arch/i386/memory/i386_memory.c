@@ -13,11 +13,10 @@
 #include <errno.h>
 
 #include <etc/multiboot.h>
-
 #include <kernel/tty.h>
 
-#include "block_alloc.h"
-#include "virtual_mm.h"
+#include <i386/memory/block_alloc.h>
+#include <i386/memory/virtual_mm.h>
 
 #define KHEAP_START_ADDR 	0xd0000000
 #define KHEAP_MAX_ADDR		0xeffff000
@@ -35,18 +34,28 @@ void *kheap_base = NULL;
 // int kmemory_initialize (): Initialize the physical and virtual memory manager
 // inputs: none
 // returns: 0 on success, nonzero on error (sets errno)
-int kmemory_initialize (unsigned int memory_sz, void *mmap, unsigned int mmap_len) {
+int kmemory_initialize (struct multiboot_info *mboot) {
+
+	// we need to make sure the bootloader provided the memory size
+	if (!bootflag_check (mboot->flags, MEMSZ_PRESENT))
+		return -1;
+
+	// compute the memory size from the multiboot structure
+	unsigned int memory_sz = (unsigned int)((mboot->memorySzLo+mboot->memorySzHi) * 1024);
 
 	if (balloc_initialize (memory_sz) == 0)
 		return -1;
 
 	// this is an x86-based system; we need to process the memory map
 	// before initializing the VMM
-	if (!mmap)
+	if (!mboot->mmap_addr)
 		return -1;
 
-	struct memory_map_inf *mmap_item = (struct memory_map_inf *)(mmap);
-	size_t i = 0, mmap_count = (size_t)(mmap_len / sizeof (struct memory_map_inf));
+	struct memory_map_inf *mmap_item = (struct memory_map_inf *)(mboot->mmap_addr);
+	unsigned int mmap_len = (unsigned int)(mboot->mmap_length);
+
+	size_t i = 0;
+	size_t mmap_count = (size_t)(mmap_len / sizeof (struct memory_map_inf));
 
 	while (i < mmap_count) {
 

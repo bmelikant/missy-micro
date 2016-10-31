@@ -18,6 +18,8 @@
 #include <stdbool.h>
 #endif
 
+#include <etc/multiboot.h>
+
 #ifdef __arch_i386
 #include <i386/memory/virtual_mm.h>
 #endif
@@ -41,7 +43,7 @@ typedef struct MSPACE {
 } memory_space;
 
 // kernel memory subsystem functions
-int 	kmemory_initialize 		();
+int 	kmemory_initialize 		(struct multiboot_info *);
 
 // kernel space functions (create / expand kernel heap)
 int		kspace_initialize		();

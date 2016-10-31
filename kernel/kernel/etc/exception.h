@@ -5,6 +5,8 @@
 extern "C" {
 #endif
 
+void kernel_panic (const char *err);
+
 #ifdef _cplusplus
 }
 #endif

@@ -41,6 +41,7 @@ kernel/memory/memory.o \
 kernel/process/process.o \
 kernel/process/syscall.o \
 kernel/etc/splashlogo.o \
+kernel/etc/exception.o \
 kernel/kernel.o
 
 OBJS:=\

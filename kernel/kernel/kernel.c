@@ -37,6 +37,7 @@
 // kernel public includes (needed by / contained in libk)
 #include <kernel/tty.h>
 #include <kernel/memory.h>
+#include <kernel/syscall.h>
 
 // kernel includes
 #include <device/device.h>
@@ -45,14 +46,10 @@
 
 #include <etc/elf32.h>
 #include <etc/exception.h>
-#include <etc/multiboot.h>
 #include <etc/splashlogo.h>
-
-#include <kernel/syscall.h>
 
 // function prototypes
 void kernel_panic 					(const char *err);
-int  kernel_setup_memory_manager 	(struct multiboot_info *mb_inf);
 int  kernel_early_init				(struct multiboot_info *mb_inf);
 void basic_sh_setup					();
 
@@ -106,8 +103,11 @@ int kernel_early_init (struct multiboot_info *mb_inf) {
 	// try to initialize physical memory manager
 	terminal_puts ("calling kernel_setup_memory_manager ()...");
 	
-	if (kernel_setup_memory_manager (mb_inf) != 0)
-		kernel_panic ("Failed to initialize kernel memory manager!");
+	if (kmemory_initialize (mb_inf) == -1)
+		kernel_panic ("Failed to set up memory manager!");
+
+	if (kspace_initialize () == -1)
+		kernel_panic ("Kernel address space could not be initialized!");
 
 	// everything is set up, return!
 	return 0;
@@ -117,44 +117,4 @@ int kernel_early_init (struct multiboot_info *mb_inf) {
 // inputs: none
 // returns: none
 void basic_sh_setup () {
-}
-
-// void kernel_panic (): pre-boot environment kernel panic
-// inputs: err - error string
-// returns: NEVER!!!
-__attribute__((__noreturn__))
-void kernel_panic (const char *err) {
-
-	terminal_puts (err);
-	terminal_puts ("Kernel must halt! Calling cpu_disable()...");
-
-	cpu_disable ();
-
-	terminal_puts ("Please reboot machine, or power off...");
-
-	for (;;);
-	__builtin_unreachable();
-}
-
-// int kernel_setup_memory_manager (): Set up the kernel's physical memory manager
-// inputs: mb_inf - multiboot information structure
-// returns: 0 on success, nonzero on error (sets errno)
-int kernel_setup_memory_manager (struct multiboot_info *mb_inf) {
-
-	// check to make sure the memory size information is present
-	if (!bootflag_check(mb_inf->flags, MEMSZ_PRESENT))
-		return -1;
-
-	// compute the total memory size in bytes
-	unsigned int memory_sz = (unsigned int) ((mb_inf->memorySzLo+mb_inf->memorySzHi) * 1024);
-
-	// now start the memory manager
-	if (kmemory_initialize (memory_sz, mb_inf->mmap_addr, mb_inf->mmap_length) == -1)
-		return -1;
-
-	// and initialize the kernel address space
-	if (kspace_initialize () == -1)
-		return -1;
-
-	return 0;
 }
