@@ -9,7 +9,8 @@
 #define MISSY_KERNEL_PROCESS_H_
 
 // kernel includes
-#include <device/cpu/cpu.h>
+#include <include/cpu.h>
+
 #include <kernel/memory.h>
 
 // process structure
@@ -18,8 +19,6 @@ struct process {
 	int process_id;
 
 	memory_space 	mspace;
-	cpu_state		process_state;
-
 };
 
 #endif /* MISSY_KERNEL_PROCESS_H_ */

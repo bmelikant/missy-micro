@@ -48,10 +48,10 @@ OBJS:=\
 $(KERNEL_ARCH_OBJS) \
 $(KERNEL_OBJS)
 
-CRTI_OBJ:=$(ARCHDIR)/asm/init/crti.o
+CRTI_OBJ:=$(ARCHDIR)/init/crti.o
 CRTBEGIN_OBJ:=$(shell $(CC) $(CFLAGS) $(LDFLAGS) -print-file-name=crtbegin.o)
 CRTEND_OBJ:=$(shell $(CC) $(CFLAGS) $(LDFLAGS) -print-file-name=crtend.o)
-CRTN_OBJ:=$(ARCHDIR)/asm/init/crtn.o
+CRTN_OBJ:=$(ARCHDIR)/init/crtn.o
 
 ALL_MY_OBJS:=\
 $(CRTI_OBJ) \

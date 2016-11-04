@@ -6,10 +6,11 @@
 
 // includes
 
-#include "../pic-8259/i386_pic.h"
+// architecture includes
+#include <i386/include/pic.h>
 
-#include "../i386-cpu/i386_cpu.h"
-#include "../i386-cpu/i386_descriptor.h"
+// kernel private includes
+#include <include/cpu.h>
 
 // Constant definitions
 
@@ -44,8 +45,8 @@
 
 uint16_t         i386_pic_get_irqreg      (uint8_t ocw3);
 
-void __attribute__((cdecl)) i386_handler_irq7 (void);
-void __attribute__((cdecl)) i386_handler_irq15 (void);
+extern interrupt i386_handler_irq7;
+extern interrupt i386_handler_irq15;
 
 // internal data
 
@@ -87,8 +88,8 @@ int i386_pic_initialize (uint8_t pic1_off, uint8_t pic2_off) {
         outportb (I386_PIC2_PORT_DATA, mask_two);
 
         // install the two spurious interrupt handlers
-        i386_idt_setvector (0x27, (uint32_t)(&i386_handler_irq7), 0x08, (uint8_t)(I386_IDT_INTERRUPTGATE_32 | I386_IDT_PRESENT | I386_IDT_RING0));
-        i386_idt_setvector (0x2f, (uint32_t)(&i386_handler_irq15), 0x08, (uint8_t)(I386_IDT_INTERRUPTGATE_32 | I386_IDT_PRESENT | I386_IDT_RING0));
+        cpu_setvector (0x27, i386_handler_irq7);
+        cpu_setvector (0x2f, i386_handler_irq15);
         
         return 0;
 }

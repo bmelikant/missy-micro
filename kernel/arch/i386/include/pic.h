@@ -28,17 +28,14 @@
 #define I386_PIC_IRQ5            0x0020
 #define I386_PIC_IRQ6            0x0040
 #define I386_PIC_IRQ7            0x0080
-#define I386_PIC_IRQ8            0x0001
-#define I386_PIC_IRQ9            0x0002
-#define I386_PIC_IRQ10           0x0004
-#define I386_PIC_IRQ11           0x0008
-#define I386_PIC_IRQ12           0x0010
-#define I386_PIC_IRQ13           0x0020
-#define I386_PIC_IRQ14           0x0040
-#define I386_PIC_IRQ15           0x0080
-
-#define i386_interrupt_enable()  __asm__ volatile("sti");
-#define i386_interrupt_disable() __asm__ volatile("cli");
+#define I386_PIC_IRQ8            I386_PIC_IRQ0
+#define I386_PIC_IRQ9            I386_PIC_IRQ1
+#define I386_PIC_IRQ10           I386_PIC_IRQ2
+#define I386_PIC_IRQ11           I386_PIC_IRQ3
+#define I386_PIC_IRQ12           I386_PIC_IRQ4
+#define I386_PIC_IRQ13           I386_PIC_IRQ5
+#define I386_PIC_IRQ14           I386_PIC_IRQ6
+#define I386_PIC_IRQ15           I386_PIC_IRQ7
 
 // Interface Functions
 

@@ -18,10 +18,10 @@
 #include <stdbool.h>
 #endif
 
-#include <etc/multiboot.h>
+#include <include/multiboot.h>
 
 #ifdef __arch_i386
-#include <i386/memory/virtual_mm.h>
+#include <i386/include/memory_virt.h>
 #endif
 
 // define a memory space for a process

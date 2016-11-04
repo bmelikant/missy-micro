@@ -12,12 +12,18 @@
 #include <stdint.h>
 #include <errno.h>
 
-#include <etc/multiboot.h>
+// kernel private includes
+#include <include/exception.h>
+#include <include/multiboot.h>
+
+// kernel public includes
 #include <kernel/tty.h>
 
-#include <i386/memory/block_alloc.h>
-#include <i386/memory/virtual_mm.h>
+// arch includes
+#include <i386/include/memory_phys.h>
+#include <i386/include/memory_virt.h>
 
+// definitions
 #define KHEAP_START_ADDR 	0xd0000000
 #define KHEAP_MAX_ADDR		0xeffff000
 #define PAGE_SIZE			0x1000
@@ -33,23 +39,25 @@ void *kheap_base = NULL;
 
 // int kmemory_initialize (): Initialize the physical and virtual memory manager
 // inputs: none
-// returns: 0 on success, nonzero on error (sets errno)
-int kmemory_initialize (struct multiboot_info *mboot) {
+// returns: none (halts on error)
+void kmemory_initialize (struct multiboot_info *mboot) {
+
+	terminal_printf ("Starting kernel memory manager... ");
 
 	// we need to make sure the bootloader provided the memory size
 	if (!bootflag_check (mboot->flags, MEMSZ_PRESENT))
-		return -1;
+		kernel_panic ("The bootloader did not report the size of RAM");
 
 	// compute the memory size from the multiboot structure
 	unsigned int memory_sz = (unsigned int)((mboot->memorySzLo+mboot->memorySzHi) * 1024);
 
 	if (balloc_initialize (memory_sz) == 0)
-		return -1;
+		kernel_panic ("Failed to initialize physical memory manager");
 
 	// this is an x86-based system; we need to process the memory map
 	// before initializing the VMM
 	if (!mboot->mmap_addr)
-		return -1;
+		kernel_panic ("Could not find a memory map in the multiboot pointer");
 
 	struct memory_map_inf *mmap_item = (struct memory_map_inf *)(mboot->mmap_addr);
 	unsigned int mmap_len = (unsigned int)(mboot->mmap_length);
@@ -69,9 +77,10 @@ int kmemory_initialize (struct multiboot_info *mboot) {
 
 	// the VMM can now be initialized
 	if (vmmngr_initialize () == -1)
-		return -1;
+		kernel_panic ("Failed to initialize virtual memory manager");
 
-	return 0;
+
+	terminal_printf ("Done!\n");
 }
 
 // int kspace_initialize (): Initialize the kernel's address space

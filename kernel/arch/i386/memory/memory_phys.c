@@ -19,7 +19,7 @@
 #include <stdbool.h>
 #endif
 
-#include "block_alloc.h"
+#include "../include/memory_phys.h"
 
 // constant definitions
 #define MEMORY_BLOCK_SIZE		4096

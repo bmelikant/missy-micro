@@ -35,28 +35,12 @@
 #include <errno.h>
 
 // kernel public includes (needed by / contained in libk)
-#include <kernel/tty.h>
 #include <kernel/memory.h>
-#include <kernel/syscall.h>
+#include <sys/syscall.h>
+#include <kernel/tty.h>
 
-// kernel includes
-#include <device/device.h>
-#include <device/cpu/cpu.h>
-#include <device/timer/timer.h>
-
-#include <etc/elf32.h>
-#include <etc/exception.h>
-#include <etc/splashlogo.h>
-
-// function prototypes
-void kernel_panic 					(const char *err);
-int  kernel_early_init				(struct multiboot_info *mb_inf);
-void basic_sh_setup					();
-
-void testcall () {
-
-	kernel_panic ("This was a system call!!!");
-}
+#include <include/exception.h>
+#include <include/splashlogo.h>
 
 // void kernel_main () : Main kernel execution method for MISSY Microsystem
 // inputs: *mboot: Multiboot header information
@@ -67,16 +51,9 @@ void kernel_main () {
 	terminal_clrscr ();
 	splash_logo ();
 
-	// initialize the device driver interface
-	device_list_init ();
+	// generate a random interrupt
+	__asm__("int $0x02");
 
-	// start the timer driver
-	int timer_major = timer_initialize ();
-	char *timer_cmd = "spawn:20";
-
-	// initialize a timer
-	if (chrdev_write (timer_major, timer_cmd, strlen(timer_cmd)) == -1)
-		printf ("Could not start timer on /dev/timer!");
 
 	for (;;);
 	__builtin_unreachable ();
@@ -102,19 +79,11 @@ int kernel_early_init (struct multiboot_info *mb_inf) {
 
 	// try to initialize physical memory manager
 	terminal_puts ("calling kernel_setup_memory_manager ()...");
+	kmemory_initialize (mb_inf);
 	
-	if (kmemory_initialize (mb_inf) == -1)
-		kernel_panic ("Failed to set up memory manager!");
-
 	if (kspace_initialize () == -1)
 		kernel_panic ("Kernel address space could not be initialized!");
 
 	// everything is set up, return!
 	return 0;
-}
-
-// void basic_sh_setup (): Set up a basic interactive shell
-// inputs: none
-// returns: none
-void basic_sh_setup () {
 }

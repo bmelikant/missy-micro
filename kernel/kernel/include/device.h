@@ -8,7 +8,7 @@ extern "C" {
 #include <stddef.h>
 #include <sys/types.h>
 
-#include <device/chrdev.h>
+#include "../include/chrdev.h"
 
 //
 // device interface functions

@@ -7,12 +7,13 @@
  */
 
 // kernel includes
+#include "../include/memory_virt.h"
+
 #include <stdio.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <string.h>
-#include "block_alloc.h"
-#include "virtual_mm.h"
+#include "../include/memory_phys.h"
 
 #ifndef _cplusplus
 #include <stdbool.h>

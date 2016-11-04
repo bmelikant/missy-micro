@@ -12,8 +12,8 @@
 #include <string.h>
 #include <errno.h>
 
-#include <device/chrdev.h>
-#include <device/device.h>
+#include "../include/chrdev.h"
+#include "../include/device.h"
 
 #define DEVICE_MAX 10
 

@@ -6,7 +6,7 @@
  */
 
 // kernel panics halt the system
-#include <device/cpu/cpu.h>
+#include <include/cpu.h>
 
 #include <kernel/tty.h>
 

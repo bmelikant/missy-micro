@@ -1,0 +1,14 @@
+%ifndef I386_EXCEPTION_INC
+%define I386_EXCEPTION_INC
+
+[bits 32]
+[section .text]
+
+[extern i386_exception_set_disp]
+[extern i386_system_stop]
+[extern str_SystemException]
+
+[extern terminal_printf]
+[extern terminal_puts]
+
+%endif
