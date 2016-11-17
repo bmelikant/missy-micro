@@ -23,7 +23,7 @@ i386_exception_set_disp:
 
 	push byte I386_EXCEPTION_COLOR
 	call terminal_setcolor
-	add esp,1
+	add esp,4						; I don't understand this; should be add esp,1 to fix the stack! *see note at bottom
 
 	call terminal_clrscr
 	ret
@@ -49,7 +49,9 @@ i386_system_stop:
 
 [section .data]
 
-str_SystemException db "[System Exception 0x%x]: %s",10,0
-str_SystemMustHalt1 db "An irrecoverable system exception has occured. Your system has been",0
+str_SystemException db "[System Exception 0x%x]: %s",10,10,0
+str_SystemMustHalt1 db 10,"An irrecoverable system exception has occured. Your system has been",0
 str_SystemMustHalt2 db "shut down to prevent damage. Please power off and restart your machine.",0
 
+; * Note (for my reference): x86 processors in 32-bit mode will store on the stack at minimum a size of 32 bits
+; When a byte is pushed onto the stack, it is actually pushed as a 32 bit value regardless of the qualifier

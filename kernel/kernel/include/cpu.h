@@ -20,9 +20,6 @@
 // architecture-specific functions and types
 #ifdef __arch_i386
 
-// interrupt vector type
-typedef void (*interrupt)(void);
-
 // CPU interface functions
 
 #define cpu_interrupt(x)	__asm__("int %0\n" :: "N"((x)) : "cc", "memory")
@@ -60,12 +57,12 @@ static inline void outportd (uint16_t port, uint32_t dword) { __asm__ volatile (
 
 /* interface routines, defined in the architecture-specific CPU files */
 
-int 	cpu_init 			();								// initialize the CPU for use
+void 	cpu_init 			();								// initialize the CPU for use
 int 	cpu_shutdown 		();								// shut down the CPU interface (should disable interrupts to halt the CPU)
 int		cpu_save_state		();								// save the state of the processor onto the current stack
 int		cpu_restore_state	();								// restore the state of the processor from the current stack
 void 	cpu_reset			();								// reset the system
-void  	cpu_setvector		(int vector, interrupt addr);	// set a CPU interrupt to point to a new function
+void  	cpu_setvector		(int vector, void *addr);		// set a CPU interrupt to point to a new function
 
 void cpu_enable_irq 	(int irq);
 void cpu_disable_irq 	(int irq);

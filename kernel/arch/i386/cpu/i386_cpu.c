@@ -110,59 +110,62 @@ void	i386_idt_setvector	(uint8_t idx, uint32_t addr, uint16_t codeSel, uint8_t f
 int 	i386_idt_initialize	();
 
 // exception handlers
-extern interrupt i386_defaulthandler;
-extern interrupt i386_divbyzero;
-extern interrupt i386_debugtrap;
-extern interrupt i386_nmi;
-extern interrupt i386_breakpoint;
-extern interrupt i386_overflow;
-extern interrupt i386_bounderror;
-extern interrupt i386_badopcode;
-extern interrupt i386_deviceerror;
-extern interrupt i386_doublefault;
-extern interrupt i386_invalidtss;
-extern interrupt i386_segnotpresent;
-extern interrupt i386_stacksegfault;
-extern interrupt i386_genprotectfault;
-extern interrupt i386_pagefault;
-extern interrupt i386_fpuexception;
-extern interrupt i386_aligncheck;
-extern interrupt i386_machinecheck;
-extern interrupt i386_simdexception;
-extern interrupt i386_virtualizeexception;
-extern interrupt i386_securityexception;
+extern void __attribute__((cdecl)) i386_defaulthandler		(void);
+extern void __attribute__((cdecl)) i386_divbyzero 			(void);
+extern void __attribute__((cdecl)) i386_debugtrap 			(void);
+extern void __attribute__((cdecl)) i386_nmi 				(void);
+extern void __attribute__((cdecl)) i386_breakpoint 			(void);
+extern void __attribute__((cdecl)) i386_overflow 			(void);
+extern void __attribute__((cdecl)) i386_bounderror 			(void);
+extern void __attribute__((cdecl)) i386_badopcode 			(void);
+extern void __attribute__((cdecl)) i386_deviceerror 		(void);
+extern void __attribute__((cdecl)) i386_doublefault 		(void);
+extern void __attribute__((cdecl)) i386_invalidtss 			(void);
+extern void __attribute__((cdecl)) i386_segnotpresent 		(void);
+extern void __attribute__((cdecl)) i386_stacksegfault 		(void);
+extern void __attribute__((cdecl)) i386_genprotectfault 	(void);
+extern void __attribute__((cdecl)) i386_pagefault 			(void);
+extern void __attribute__((cdecl)) i386_fpuexception 		(void);
+extern void __attribute__((cdecl)) i386_aligncheck 			(void);
+extern void __attribute__((cdecl)) i386_machinecheck 		(void);
+extern void __attribute__((cdecl)) i386_simdexception 		(void);
+extern void __attribute__((cdecl)) i386_virtualizeexception (void);
+extern void __attribute__((cdecl)) i386_securityexception 	(void);
 
 /* Interface functions */
 
 // int cpu_init (): Initialize the CPU
 // inputs: none, returns: 0 on success, -1 on error
-int cpu_init () {
+void cpu_init () {
+
+	// make sure interrupts are disabled
+	cpu_disable ();
 
 	// initialize the descriptor tables and interrupt table
 	i386_gdt_initialize ();
 	i386_idt_initialize ();
 
 	// install the interrupt handlers
-	cpu_setvector (0x00, i386_divbyzero);
-	cpu_setvector (0x01, i386_debugtrap);
-	cpu_setvector (0x02, i386_nmi);
-	cpu_setvector (0x03, i386_breakpoint);
-	cpu_setvector (0x04, i386_overflow);
-	cpu_setvector (0x05, i386_bounderror);
-	cpu_setvector (0x06, i386_badopcode);
-	cpu_setvector (0x07, i386_deviceerror);
-	cpu_setvector (0x08, i386_doublefault);
-	cpu_setvector (0x0A, i386_invalidtss);
-	cpu_setvector (0x0B, i386_segnotpresent);
-	cpu_setvector (0x0C, i386_stacksegfault);
-	cpu_setvector (0x0D, i386_genprotectfault);
-	cpu_setvector (0x0E, i386_pagefault);
-	cpu_setvector (0x10, i386_fpuexception);
-	cpu_setvector (0x11, i386_aligncheck);
-	cpu_setvector (0x12, i386_machinecheck);
-	cpu_setvector (0x13, i386_simdexception);
-	cpu_setvector (0x14, i386_virtualizeexception);
-	cpu_setvector (0x1E, i386_securityexception);
+	cpu_setvector (0x00, (void *) &i386_divbyzero);
+	cpu_setvector (0x01, (void *) &i386_debugtrap);
+	cpu_setvector (0x02, (void *) &i386_nmi);
+	cpu_setvector (0x03, (void *) &i386_breakpoint);
+	cpu_setvector (0x04, (void *) &i386_overflow);
+	cpu_setvector (0x05, (void *) &i386_bounderror);
+	cpu_setvector (0x06, (void *) &i386_badopcode);
+	cpu_setvector (0x07, (void *) &i386_deviceerror);
+	cpu_setvector (0x08, (void *) &i386_doublefault);
+	cpu_setvector (0x0A, (void *) &i386_invalidtss);
+	cpu_setvector (0x0B, (void *) &i386_segnotpresent);
+	cpu_setvector (0x0C, (void *) &i386_stacksegfault);
+	cpu_setvector (0x0D, (void *) &i386_genprotectfault);
+	cpu_setvector (0x0E, (void *) &i386_pagefault);
+	cpu_setvector (0x10, (void *) &i386_fpuexception);
+	cpu_setvector (0x11, (void *) &i386_aligncheck);
+	cpu_setvector (0x12, (void *) &i386_machinecheck);
+	cpu_setvector (0x13, (void *) &i386_simdexception);
+	cpu_setvector (0x14, (void *) &i386_virtualizeexception);
+	cpu_setvector (0x1E, (void *) &i386_securityexception);
 
     // set up the interrupt controller and mask the timer
     i386_pic_initialize (0x20, 0x28);
@@ -204,15 +207,16 @@ void cpu_reset () {
 	cpu_disable ();
 
 	// set an invalid descriptor then call it
-	cpu_setvector (0x80, (interrupt) 0x00);
+	cpu_setvector (0x80, (void *) 0x00);
 
 	// execute an invalid interrupt
 	cpu_interrupt (0x80);
 }
 
 // void cpu_setvector (): Set an interrupt vector up
-void cpu_setvector (int vector, interrupt addr) {
+void cpu_setvector (int vector, void *addr) {
 
+	terminal_printf ("Setting cpu vector 0x%x\n", (uint8_t)(vector));
 	i386_idt_setvector ((uint8_t) vector, (uint32_t)(addr), 0x08, (uint8_t) (I386_IDT_INTERRUPTGATE_32 | I386_IDT_PRESENT | I386_IDT_RING0));
 }
 
@@ -307,8 +311,8 @@ void i386_idt_install () {
 // Returns: None
 void i386_idt_setvector (uint8_t idx, uint32_t addr, uint16_t codesel, uint8_t attr) {
 
-        // clear the current descriptor
-        memset ((void*)(&_idt[idx]),0,sizeof(struct idtentry));
+    // clear the current descriptor
+    memset ((void*)(&_idt[idx]),0,sizeof(struct idtentry));
 
 	_idt[idx].codeSelector = codesel;
 	_idt[idx].zero         = 0;
@@ -320,8 +324,8 @@ void i386_idt_setvector (uint8_t idx, uint32_t addr, uint16_t codesel, uint8_t a
 // int i386_idt_initialize (): Initialize the interrupt descriptor table
 int i386_idt_initialize () {
 
-        // set the memory block at the current interrupt to null
-        memset ((void*)(&_idt[0]),0,sizeof(struct idtentry)*I386_MAX_INTERRUPTS-1);
+    // set the memory block at the current interrupt to null
+	memset ((void*)(&_idt[0]),0,sizeof(struct idtentry)*I386_MAX_INTERRUPTS-1);
 
 	for (int i = 0; i < I386_MAX_INTERRUPTS; i++)
 		i386_idt_setvector (i, (uint32_t)(&i386_defaulthandler), 0x08, (uint8_t) (I386_IDT_INTERRUPTGATE_32 | I386_IDT_PRESENT | I386_IDT_RING0));

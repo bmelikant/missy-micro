@@ -12,9 +12,9 @@
 #include <string.h>
 #include <stdint.h>
 
-#include <device/device.h>
 #include <device/cpu/cpu.h>
-#include <device/timer/timer.h>
+#include "../../../../kernel/kernel/include/device.h"
+#include "../../../../kernel/kernel/include/timer.h"
 
 #ifndef _cplusplus
 #include <stdbool.h>

@@ -45,8 +45,8 @@
 
 uint16_t         i386_pic_get_irqreg      (uint8_t ocw3);
 
-extern interrupt i386_handler_irq7;
-extern interrupt i386_handler_irq15;
+extern void __attribute__((cdecl)) i386_handler_irq7 (void);
+extern void __attribute__((cdecl)) i386_handler_irq15 (void);
 
 // internal data
 
@@ -88,8 +88,8 @@ int i386_pic_initialize (uint8_t pic1_off, uint8_t pic2_off) {
         outportb (I386_PIC2_PORT_DATA, mask_two);
 
         // install the two spurious interrupt handlers
-        cpu_setvector (0x27, i386_handler_irq7);
-        cpu_setvector (0x2f, i386_handler_irq15);
+        cpu_setvector (0x27, &i386_handler_irq7);
+        cpu_setvector (0x2f, &i386_handler_irq15);
         
         return 0;
 }

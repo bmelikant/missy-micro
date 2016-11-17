@@ -3,6 +3,7 @@
 
 [bits 32]
 [section .text]
+align 4
 
 [extern i386_exception_set_disp]
 [extern i386_system_stop]

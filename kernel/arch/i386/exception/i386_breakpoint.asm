@@ -9,16 +9,12 @@ i386_breakpoint:
 
 	pushad
 
-	call i386_exception_set_disp
-
 	push str_Breakpoint
 	push dword [int_ExceptionNumber]
 	push str_SystemException
 
 	call terminal_printf
 	add esp,12
-
-	call i386_system_stop
 
 	popad
 	iretd

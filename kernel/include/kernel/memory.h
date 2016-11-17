@@ -43,10 +43,10 @@ typedef struct MSPACE {
 } memory_space;
 
 // kernel memory subsystem functions
-int 	kmemory_initialize 		(struct multiboot_info *);
+void 	kmemory_initialize 		(struct multiboot_info *);
 
 // kernel space functions (create / expand kernel heap)
-int		kspace_initialize		();
+void	kspace_initialize		();
 int		kspace_brk				(void *addr);
 void 	*kspace_sbrk		 	(size_t sz);
 

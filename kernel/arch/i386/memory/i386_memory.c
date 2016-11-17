@@ -86,13 +86,13 @@ void kmemory_initialize (struct multiboot_info *mboot) {
 // int kspace_initialize (): Initialize the kernel's address space
 // inputs: none
 // returns: 0 on success, -1 on error (sets errno)
-int kspace_initialize () {
+void kspace_initialize () {
 
 	// create the start of the kernel heap. Initial heap is 4kb
 	kheap_base = balloc_get ();
 
 	if (!kheap_base)
-		return -1;
+		kernel_panic ("Failed to allocate space for kernel heap");
 
 	// map the page into the kernel's virtual address space
 	vmmngr_map_page ((phys_addr) kheap_base, (virt_addr) KHEAP_START_ADDR);
@@ -100,8 +100,6 @@ int kspace_initialize () {
 	// expand the initial heap into the virtual address space
 	kernel_break = KHEAP_START_ADDR;
 	kheap_last_page = KHEAP_START_ADDR;
-
-	return 0;
 }
 
 // int kspace_brk (): Expand the kernel heap by setting the break (data segment end)

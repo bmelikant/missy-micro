@@ -36,11 +36,11 @@
 
 // kernel public includes (needed by / contained in libk)
 #include <kernel/memory.h>
-#include <sys/syscall.h>
 #include <kernel/tty.h>
 
 #include <include/exception.h>
 #include <include/splashlogo.h>
+#include <include/cpu.h>
 
 // void kernel_main () : Main kernel execution method for MISSY Microsystem
 // inputs: *mboot: Multiboot header information
@@ -50,10 +50,6 @@ void kernel_main () {
 	// clear the screen and print our splash logo
 	terminal_clrscr ();
 	splash_logo ();
-
-	// generate a random interrupt
-	__asm__("int $0x02");
-
 
 	for (;;);
 	__builtin_unreachable ();
@@ -71,19 +67,11 @@ int kernel_early_init (struct multiboot_info *mb_inf) {
 	terminal_puts ("pre-boot terminal initialized...");
 	terminal_puts ("running kernel_early_init ()...");
 
-	// do early processor setup
-	terminal_puts ("early processor setup in progress...");
-
-	if (cpu_init () != 0)
-		kernel_panic ("Failed to perform early processor setup!");
-
-	// try to initialize physical memory manager
-	terminal_puts ("calling kernel_setup_memory_manager ()...");
+	// early processor and memory initialization
+	cpu_init ();
 	kmemory_initialize (mb_inf);
+	kspace_initialize ();
 	
-	if (kspace_initialize () == -1)
-		kernel_panic ("Kernel address space could not be initialized!");
-
 	// everything is set up, return!
 	return 0;
 }
