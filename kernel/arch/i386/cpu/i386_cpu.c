@@ -23,6 +23,7 @@
 
 // architecture includes
 #include <i386/include/pic.h>
+#include <i386/include/pit.h>
 
 #define GDT_MAX_DESCRIPTORS 10
 #define I386_MAX_INTERRUPTS 255
@@ -171,11 +172,15 @@ void cpu_init () {
     i386_pic_initialize (0x20, 0x28);
     i386_pic_mask_irq (I386_PIC_IRQ0);
 
+    // set up the interval timer
+    i386_pit_initialize ();
+
     // now that the CPU is all set up along with its necessary
     // devices, we can go ahead and start interrupts!!
     cpu_enable ();
 
-	return 0;
+    // print a message: we are loaded into the cpu!
+    terminal_puts ("cpu_init () success.");
 }
 
 // int cpu_shutdown (): Shut down the CPU. This function disables interrupts to halt the system

@@ -42,6 +42,8 @@
 #include <include/splashlogo.h>
 #include <include/cpu.h>
 
+extern int pit_tick_count;
+
 // void kernel_main () : Main kernel execution method for MISSY Microsystem
 // inputs: *mboot: Multiboot header information
 // returns: should never return (-1 on error to ASM procedure)
@@ -51,6 +53,14 @@ void kernel_main () {
 	terminal_clrscr ();
 	splash_logo ();
 
+	terminal_puts ("MISSY v3.0 initialized successfully. Loading...");
+
+	// print the pit tick count
+	for (;;) {
+
+		terminal_setloc (0, 10);
+		terminal_printf ("Current tick count: %d", pit_tick_count);
+	}
 	for (;;);
 	__builtin_unreachable ();
 }
