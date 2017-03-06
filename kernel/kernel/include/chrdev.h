@@ -11,7 +11,6 @@ extern "C" {
 // TODO: Remove this temporary definition when the virtual filesystem is in place
 #define DEVICE_MAXPATH 255
 
-
 typedef struct CHRDEV_OPERATIONS {
 
 	ssize_t (*read_chrdev)(char *buf, size_t len);

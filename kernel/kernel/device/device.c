@@ -12,29 +12,37 @@
 #include <string.h>
 #include <errno.h>
 
-#include "../include/chrdev.h"
-#include "../include/device.h"
+#include <kernel/memory.h>
+#include <kernel/tty.h>
+
+#include <include/chrdev.h>
+#include <include/device.h>
 
 #define DEVICE_MAX 10
 
-typedef struct CHARACTER_DEVICE {
+typedef struct CHARACTER_DEVICE_NODE {
 
-	bool allocated;
-	char device_name[DEVICE_MAXPATH];
-	chrdev_ops *chrdev_fns;
+	chrdev c;
+	struct CHARACTER_DEVICE_NODE *next;
 
-} chrdev;
+} chrdev_node;
 
 // character device inode list
 chrdev char_devices[DEVICE_MAX];
 
+chrdev_node chrdev_list_base;
+chrdev_node *chrdev_list;
+
 // int device_list_init (): Initialize the device subsystem
-int device_list_init () {
+void device_list_init () {
 
-	for (size_t i = 0; i < DEVICE_MAX; i++)
-		char_devices[i].allocated = false;
+	// create an empty first node
+	chrdev_list = &chrdev_list_base;
+	chrdev_list_base.next = NULL;
 
-	return 0;
+	chrdev_list_base.c.allocated = false;
+	chrdev_list_base.c.chrdev_fns = NULL;
+	strncpy (chrdev_list_base.c.device_name, "NULL_DEVICE", strlen ("NULL_DEVICE"));
 }
 
 // int register_chrdev (): register a character device with the system

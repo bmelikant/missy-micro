@@ -8,12 +8,21 @@ extern "C" {
 #include <stddef.h>
 #include <sys/types.h>
 
-#include "../include/chrdev.h"
+#include <include/chrdev.h>
+
+typedef struct CHARACTER_DEVICE {
+
+	bool allocated;
+	unsigned long device_id;
+	char device_name[DEVICE_MAXPATH];
+	chrdev_ops *chrdev_fns;
+
+} chrdev;
 
 //
 // device interface functions
-int device_list_init 		();
-int device_list_shutdown	();
+void device_list_init 		();
+void device_list_shutdown	();
 
 // character device interaction
 int register_chrdev (int major, const char *name, chrdev_ops *device_ops);

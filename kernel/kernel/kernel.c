@@ -37,7 +37,7 @@
 // kernel public includes (needed by / contained in libk)
 #include <kernel/memory.h>
 #include <kernel/tty.h>
-
+#include <include/device.h>
 #include <include/exception.h>
 #include <include/splashlogo.h>
 #include <include/cpu.h>
@@ -81,6 +81,7 @@ int kernel_early_init (struct multiboot_info *mb_inf) {
 	cpu_init ();
 	kmemory_initialize (mb_inf);
 	kspace_initialize ();
+	device_list_init ();
 	
 	// everything is set up, return!
 	return 0;
