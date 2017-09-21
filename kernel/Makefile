@@ -36,12 +36,15 @@ LIBS:=$(LIBS) $(KERNEL_ARCH_LIBS)
 
 KERNEL_OBJS:=\
 kernel/device/device.o \
+kernel/memory/kmemory.o \
+kernel/memory/balloc.o \
 kernel/memory/kalloc.o \
-kernel/memory/memory.o \
 kernel/process/process.o \
 kernel/process/syscall.o \
 kernel/etc/splashlogo.o \
 kernel/etc/exception.o \
+kernel/etc/acpi.o \
+kernel/etc/multiboot.o \
 kernel/kernel.o
 
 OBJS:=\

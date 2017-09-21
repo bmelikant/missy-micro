@@ -170,7 +170,7 @@ void cpu_init () {
 
     // set up the interrupt controller and mask the timer
     i386_pic_initialize (0x20, 0x28);
-    i386_pic_mask_irq (I386_PIC_IRQ0);
+    //i386_pic_mask_irq (I386_PIC_IRQ0);
 
     // set up the interval timer
     i386_pit_initialize ();

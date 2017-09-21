@@ -5,6 +5,10 @@
 extern "C" {
 #endif
 
+#ifndef _cplusplus
+#include <stdbool.h>
+#endif
+
 #include <stddef.h>
 #include <sys/types.h>
 
@@ -19,7 +23,6 @@ typedef struct CHARACTER_DEVICE {
 
 } chrdev;
 
-//
 // device interface functions
 void device_list_init 		();
 void device_list_shutdown	();
@@ -28,8 +31,8 @@ void device_list_shutdown	();
 int register_chrdev (int major, const char *name, chrdev_ops *device_ops);
 
 // used for system calls / kernel access to devices
-void chrdev_open 	();
-void chrdev_close 	();
+void chrdev_open 	(int major);
+void chrdev_close 	(int major);
 
 ssize_t chrdev_read 	(int major, char *buf, size_t len);
 ssize_t chrdev_write 	(int major, char *buf, size_t len);

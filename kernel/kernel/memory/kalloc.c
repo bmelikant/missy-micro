@@ -10,7 +10,7 @@
 #include <stdio.h>
 
 // kernel includes
-#include <kernel/memory.h>
+#include "../include/kmemory.h"
 
 // constants
 #define MIN_REQUEST_SIZE 1024

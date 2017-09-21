@@ -12,11 +12,11 @@
 #include <string.h>
 #include <errno.h>
 
-#include <kernel/memory.h>
+#include "../include/kmemory.h"
 #include <kernel/tty.h>
+#include <kernel/device.h>
 
 #include <include/chrdev.h>
-#include <include/device.h>
 
 #define DEVICE_MAX 10
 
@@ -42,7 +42,7 @@ void device_list_init () {
 
 	chrdev_list_base.c.allocated = false;
 	chrdev_list_base.c.chrdev_fns = NULL;
-	strncpy (chrdev_list_base.c.device_name, "NULL_DEVICE", strlen ("NULL_DEVICE"));
+	strncpy (chrdev_list_base.c.device_name, "", DEVICE_MAXPATH);
 }
 
 // int register_chrdev (): register a character device with the system

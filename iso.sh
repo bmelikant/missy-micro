@@ -11,5 +11,8 @@ cat > isodir/boot/grub/grub.cfg << EOF
 menuentry "MISSY Microsystem" {
 	multiboot /boot/missy_os
 }
+menuentry "MISSY Microsystem (multiboot2)" {
+	multiboot2 /boot/missy_os
+}
 EOF
 grub-mkrescue -o missy.iso isodir

@@ -15,12 +15,12 @@
 // kernel private includes
 #include <include/exception.h>
 #include <include/multiboot.h>
+#include <include/balloc.h>
 
 // kernel public includes
 #include <kernel/tty.h>
 
 // arch includes
-#include <i386/include/memory_phys.h>
 #include <i386/include/memory_virt.h>
 
 // definitions
@@ -37,50 +37,21 @@ uint32_t kheap_last_page = KHEAP_START_ADDR - PAGE_SIZE;
 // internal variables
 void *kheap_base = NULL;
 
+// internal functions
+static void kmemory_init_mboot 	(struct multiboot_info *mboot);
+static void kmemory_init_mboot2 (struct multiboot2_tag *mboot2);
+
 // int kmemory_initialize (): Initialize the physical and virtual memory manager
 // inputs: none
 // returns: none (halts on error)
-void kmemory_initialize (struct multiboot_info *mboot) {
+void kmemory_initialize (void *mboot, unsigned int mboot_magic) {
 
 	terminal_printf ("Starting kernel memory manager... ");
 
-	// we need to make sure the bootloader provided the memory size
-	if (!bootflag_check (mboot->flags, MEMSZ_PRESENT))
-		kernel_panic ("The bootloader did not report the size of RAM");
-
-	// compute the memory size from the multiboot structure
-	unsigned int memory_sz = (unsigned int)((mboot->memorySzLo+mboot->memorySzHi) * 1024);
-
-	if (balloc_initialize (memory_sz) == 0)
-		kernel_panic ("Failed to initialize physical memory manager");
-
-	// this is an x86-based system; we need to process the memory map
-	// before initializing the VMM
-	if (!mboot->mmap_addr)
-		kernel_panic ("Could not find a memory map in the multiboot pointer");
-
-	struct memory_map_inf *mmap_item = (struct memory_map_inf *)(mboot->mmap_addr);
-	unsigned int mmap_len = (unsigned int)(mboot->mmap_length);
-
-	size_t i = 0;
-	size_t mmap_count = (size_t)(mmap_len / sizeof (struct memory_map_inf));
-
-	while (i < mmap_count) {
-
-		// flag any regions that are not type 'available'
-		if (mmap_item->type != 1)
-			balloc_init_region ((unsigned int) mmap_item->baseAddr, (unsigned int) mmap_item->length);
-
-		mmap_item = (struct memory_map_inf *)((unsigned int)mmap_item+mmap_item->sz+sizeof(mmap_item->sz));
-		i++;
-	}
-
-	// the VMM can now be initialized
-	if (vmmngr_initialize () == -1)
-		kernel_panic ("Failed to initialize virtual memory manager");
-
-
-	terminal_printf ("Done!\n");
+	if (mboot_magic == MULTIBOOT_MAGIC)
+		kmemory_init_mboot ((struct multiboot_info *) mboot);
+	else if (mboot_magic == MULTIBOOT2_MAGIC)
+		kmemory_init_mboot2 ((struct multiboot2_tag *) mboot);
 }
 
 // int kspace_initialize (): Initialize the kernel's address space
@@ -169,4 +140,49 @@ void *kspace_sbrk (size_t increment) {
 	}
 
 	return old_brk;
+}
+
+static void kmemory_init_mboot (struct multiboot_info *mboot) {
+
+	// we need to make sure the bootloader provided the memory size
+	if (!bootflag_check (mboot->flags, MEMSZ_PRESENT))
+		kernel_panic ("The bootloader did not report the size of RAM");
+
+	// compute the memory size from the multiboot structure
+	unsigned int memory_sz = (unsigned int)((mboot->memorySzLo+mboot->memorySzHi) * 1024);
+
+	if (balloc_initialize (memory_sz) == 0)
+		kernel_panic ("Failed to initialize physical memory manager");
+
+	// this is an x86-based system; we need to process the memory map
+	// before initializing the VMM
+	if (!mboot->mmap_addr)
+		kernel_panic ("Could not find a memory map in the multiboot pointer");
+
+	struct memory_map_inf *mmap_item = (struct memory_map_inf *)(mboot->mmap_addr);
+	unsigned int mmap_len = (unsigned int)(mboot->mmap_length);
+
+	size_t i = 0;
+	size_t mmap_count = (size_t)(mmap_len / sizeof (struct memory_map_inf));
+
+	while (i < mmap_count) {
+
+		// flag any regions that are not type 'available'
+		if (mmap_item->type != 1)
+			balloc_init_region ((unsigned int) mmap_item->baseAddr, (unsigned int) mmap_item->length);
+
+		mmap_item = (struct memory_map_inf *)((unsigned int)mmap_item+mmap_item->sz+sizeof(mmap_item->sz));
+		i++;
+	}
+
+	// the VMM can now be initialized
+	if (vmmngr_initialize () == -1)
+		kernel_panic ("Failed to initialize virtual memory manager");
+
+
+	terminal_printf ("Done!\n");
+}
+
+void kmemory_init_mboot2 (struct multiboot2_tag *mboot) {
+
 }

@@ -27,14 +27,33 @@ bits 32
 
 MULTIBOOT_PAGE_ALIGN   equ 1<<0
 MULTIBOOT_MEMORY_INFO  equ 1<<1
-MULTIBOOT_HEADER_MAGIC equ 0x1BADB002
+MULTIBOOT_HEADER_MAGIC equ 0x1badb002
 MULTIBOOT_HEADER_FLAGS equ MULTIBOOT_PAGE_ALIGN | MULTIBOOT_MEMORY_INFO
 MULTIBOOT_CHECKSUM     equ -(MULTIBOOT_HEADER_MAGIC+MULTIBOOT_HEADER_FLAGS)
 
+MULTIBOOT2_MAGIC        equ 0xe85250d6
+MULTIBOOT2_ARCH         equ 0
+MULTIBOOT2_HEADER_SZ    equ (multiboot2_end-multiboot2_hdr)
+MULTIBOOT2_CHECKSUM     equ -(MULTIBOOT2_MAGIC+MULTIBOOT2_ARCH+MULTIBOOT2_HEADER_SZ)
+
 ; place the multiboot header in it's own section
 
-section .multiboot
+[section .multiboot]
 align 4
+multiboot2_hdr:
+
+    dd MULTIBOOT2_MAGIC         ; magic value
+    dd MULTIBOOT2_ARCH          ; architecture type
+    dd MULTIBOOT2_HEADER_SZ     ; header size
+    dd MULTIBOOT2_CHECKSUM      ; checksum
+
+    ; end tag
+    dw 0        ; tag type 0
+    dw 0        ; tag flags none
+    dd 8        ; tag size 8 bytes
+
+multiboot2_end:
+
 multiboot_hdr:
 
 	dd MULTIBOOT_HEADER_MAGIC
@@ -48,7 +67,8 @@ multiboot_hdr:
 
 ; memory location to preserve the multiboot pointer
 
-multiboot_ptr dd 0x00000000
+multiboot_ptr   dd 0x00000000
+multiboot_magic dd 0x00000000
 
 ; global descriptor table (to override GRUB's table)
 
@@ -78,6 +98,9 @@ start:
 
 next:
 
+    ; save the multiboot magic type field
+    xchg eax,edx
+
 	; fix our segments
 
 	mov ax,0x10
@@ -92,6 +115,7 @@ next:
 	; jump to the actual start code, below the paging install routine
 
 	mov dword [multiboot_ptr],ebx
+	mov dword [multiboot_magic],edx
 	jmp start_system
 
 ;---------------------------------------------------------;
@@ -194,6 +218,7 @@ start_system:
 	; first set up the page directory table and page tables
 
 	call setup_paging
+	push dword [multiboot_magic]
 	push dword [multiboot_ptr]
 
 	; now enable the paging mechanism
@@ -214,15 +239,16 @@ paging_code:
 ; paging is enabled. All addresses must now be translated as virtual
 ; switch to the .text section (regular system code, 0xC0000000 virtual)
 
-	; restore the multiboot ptr
-
+	; restore the multiboot ptr and the multiboot magic
 	pop ebx
+	pop edx
 
 	; set up a new stack frame
 	mov ebp,KERNEL_STACK_ADDR
 	mov esp,ebp
 
-	; kernel early initialization functiom
+	; kernel early initialization function
+	push edx
 	push ebx
 	call kernel_early_init
 
@@ -248,8 +274,8 @@ paging_code:
 	jmp $
 
 [section .system_stack]
-
 resb 4096
+
 [global system_stack]
 system_stack:
 

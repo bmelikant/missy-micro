@@ -7,7 +7,6 @@
 
 [bits 32]
 [section .text]
-align 4;
 
 [extern pit_tick_count]
 [global pit_irq_handler]

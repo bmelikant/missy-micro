@@ -19,7 +19,7 @@
 #include <stdbool.h>
 #endif
 
-#include "../include/memory_phys.h"
+#include <include/balloc.h>
 
 // constant definitions
 #define MEMORY_BLOCK_SIZE		4096
@@ -59,12 +59,6 @@ unsigned int balloc_initialize (unsigned int memory_sz) {
 	// place the memory bitmap at the end of the kernel
 	mem_sz = memory_sz;
 	m_bmp = ((unsigned int *)(&kernel_start)) + kernel_sz;
-
-	printf ("Physical memory size: %d\n", memory_sz/1024);
-	printf ("The kernel starts at 0x%x and ends at 0x%x\n", (unsigned int)&kernel_start, (unsigned int)&kernel_end);
-	printf ("Ok, the kernel_start symbol content is 0x%x\n", (unsigned int) kernel_start);
-	printf ("Kernel size reported as %d\n", kernel_sz);
-	printf ("Memory address for m_bmp is 0x%x\n", (unsigned int) m_bmp);
 
 	// set up the number of blocks in the system
 	total_blocks = (unsigned int)(memory_sz / MEMORY_BLOCK_SIZE);

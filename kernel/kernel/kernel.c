@@ -35,14 +35,21 @@
 #include <errno.h>
 
 // kernel public includes (needed by / contained in libk)
-#include <kernel/memory.h>
 #include <kernel/tty.h>
-#include <include/device.h>
+#include <kernel/device.h>
+
+// kernel private includes
+#include <include/multiboot.h>
+#include <include/acpi.h>
 #include <include/exception.h>
 #include <include/splashlogo.h>
 #include <include/cpu.h>
+#include <include/kmemory.h>
 
-extern int pit_tick_count;
+#include <i386/include/ps2_kb.h>
+
+// the command line function
+int kernel_command_line();
 
 // void kernel_main () : Main kernel execution method for MISSY Microsystem
 // inputs: *mboot: Multiboot header information
@@ -55,12 +62,15 @@ void kernel_main () {
 
 	terminal_puts ("MISSY v3.0 initialized successfully. Loading...");
 
-	// print the pit tick count
-	for (;;) {
+	// try to initialize the boot time tty
+	if (kernel_tty_initialize () == -1)
+		kernel_panic ("Could not initialize the boot time TTY device!");
 
-		terminal_setloc (0, 10);
-		terminal_printf ("Current tick count: %d", pit_tick_count);
+	// run the basic command line
+	for (;;) {
+		kernel_command_line();
 	}
+
 	for (;;);
 	__builtin_unreachable ();
 }
@@ -68,7 +78,7 @@ void kernel_main () {
 // int kernel_early_init (): Initialize the kernel (before calls to any C runtime)
 // inputs: *mboot: Multiboot header information
 // returns: -1 on error, 0 on success
-int kernel_early_init (struct multiboot_info *mb_inf) {
+int kernel_early_init (void *mb_inf, unsigned int mboot_magic) {
 
 	// initialize the terminal and print a short message
 	terminal_initialize ();
@@ -77,12 +87,105 @@ int kernel_early_init (struct multiboot_info *mb_inf) {
 	terminal_puts ("pre-boot terminal initialized...");
 	terminal_puts ("running kernel_early_init ()...");
 
+	// first thing: load the multiboot system
+	if (multiboot_data_init (mb_inf, mboot_magic) == -1)
+		kernel_panic ("No usable multiboot information was found!");
+
+	terminal_printf ("Multiboot reports physical memory of %d kilobytes\n", multiboot_get_memsz());
+
 	// early processor and memory initialization
 	cpu_init ();
-	kmemory_initialize (mb_inf);
-	kspace_initialize ();
-	device_list_init ();
+	kmemory_initialize ();
+	kspace_initialize  ();
+	device_list_init   ();
+
+	// try to locate the tables
+	RSDP_Descriptor *acpi_table = acpi_locate_rsdp ();
+
+	if (!acpi_table)
+		kernel_panic ("Could not locate the ACPI tables!");
+
+	// check and report the ACPI compliance version
+	terminal_printf ("Found ACPI data for ACPI version 0x%x\n", acpi_table->revision);
+
+	if (acpi_get_checksum (acpi_table) > 0)
+		kernel_panic ("The ACPI table is invalid!");
+
+	// if the RSDT is in identity-mapped memory we are okay
+	// otherwise, we have to map it into memory
+	terminal_printf ("The RSDT is located at physical address 0x%x\n", (unsigned int) acpi_table->rsdt_addr);
 	
 	// everything is set up, return!
+	return 0;
+}
+
+// hold kernel terminal builtin commands
+typedef struct KTERMINAL_BUILTIN {
+
+	unsigned char *commandtxt;
+	int (*commandcode)(void);
+
+} kterm_builtin;
+
+int kterminal_help();
+int kterminal_clear();
+int kterminal_ticks();
+
+// the number of builtins we have
+kterm_builtin_count = 3;
+
+// the actual array of builtins
+kterm_builtin builtins[] = {
+	{ "help", kterminal_help },
+	{ "clear", kterminal_clear },
+	{ "ticks", kterminal_ticks }
+};
+
+// run a single command from the builtin terminal
+int kernel_command_line () {
+
+	// output the prompt
+	terminal_printf("prompt:> ");
+
+	// allocate space on the stack and get the input string
+	unsigned char *cmdstr = kernel_alloc(255);
+	memset(cmdstr, 0, 255);
+	kernel_tty_read(cmdstr, 255);
+	terminal_puts("");
+
+	// check to see if the command is a builtin
+	for (size_t i = 0; i < kterm_builtin_count; i++)
+		if (!strncmp(cmdstr, builtins[i].commandtxt, strlen(cmdstr)))
+			return builtins[i].commandcode();
+
+	// otherwise, unknown command
+	terminal_puts("Error: unrecognized command");
+	return -1;
+}
+
+// kterminal_help (): Print the help menu for the kernel
+int kterminal_help () {
+	
+		terminal_puts("\nKernel TTY built-in commands:\n");
+		terminal_puts("\tclear: Clears the input terminal");
+		terminal_puts("\tticks: print the current PIT tick count");
+		terminal_puts("");
+
+		return 0;
+}
+
+// kterminal_clear(): Clear the display
+int kterminal_clear() {
+
+	terminal_clrscr();
+	return 0;
+}
+
+extern int pit_tick_count;
+
+// print the current number of ticks
+int kterminal_ticks() {
+
+	terminal_printf("Current tick count: %d\n", pit_tick_count);
 	return 0;
 }

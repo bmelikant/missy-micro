@@ -11,14 +11,14 @@
 // kernel includes
 #include <include/cpu.h>
 
-#include <kernel/memory.h>
+// kernel private includes
+#include <include/kmemory.h>
 
 // process structure
 struct process {
 
-	int process_id;
+	unsigned long process_id;
 
-	memory_space 	mspace;
 };
 
 #endif /* MISSY_KERNEL_PROCESS_H_ */

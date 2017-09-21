@@ -7,6 +7,9 @@
  */
 
 #include <sys/syscall.h>
+
+// kernel private includes
+#include <include/kmemory.h>
 #include <include/cpu.h>
 
 #define SYSCALL_MAX 256
@@ -19,3 +22,5 @@ system_call syscall_table[SYSCALL_MAX];
 // inputs: idx - system call number, syscall - address of system call
 // returns: none
 void install_syscall (unsigned int idx, system_call c) { syscall_table[idx] = c; }
+
+//

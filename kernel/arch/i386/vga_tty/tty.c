@@ -6,30 +6,109 @@
  */
 
 #include <kernel/tty.h>
+#include <kernel/device.h>
+
+#include <include/cpu.h>
+
+// architecture includes
+#include <i386/include/ps2_kb.h>
 
 #include <stdint.h>
 #include <stddef.h>
 #include <stdarg.h>
 #include <string.h>
 
+// character device interface for the boot time TTY
+chrdev_ops tty_ops = {
+
+	kernel_tty_read, kernel_tty_write,
+	NULL, NULL
+};
 
 // constant definitions
-#define VGA_VIDEO_ROWS		25		// max rows
-#define VGA_VIDEO_COLUMNS	80		// max columns
+#define VGA_VIDEO_ROWS		25			// max rows
+#define VGA_VIDEO_COLUMNS	80			// max columns
 #define VGA_VIDEO_MEMORY	0xb8000		// video memory start
 #define VGA_VIDEO_DEFCOLOR	0x0f		// screen is white-on-black by default
-#define VGA_TABSIZE			4		// tab size for our driver
+#define VGA_TABSIZE			4			// tab size for our driver
+#define KEYBUF_MAX			256			// we can buffer at most 256 characters from the keyboard
 
 static int _curX, _curY;
 static uint8_t color_attrib;
 static uint16_t *video_memory;
 
+static unsigned char keybuffer[KEYBUF_MAX];
+
+// initialize the TTY device for tty0
+unsigned long kernel_tty_initialize () {
+
+	// the terminal is already set up (rather, it should be...)
+	// so initialize the keyboard driver
+	if (ps2_keyb_initialize () == -1)
+		return -1;
+
+	return 0;
+}
+
+// read from the boot time TTY device
+ssize_t kernel_tty_read (char *buf, size_t len) {
+
+	// try to read from the keyboard buffer
+	int i = ps2_keyb_getbyte ();
+	ssize_t count = 0;
+
+	// wait for keys to be available
+	if (i == -1)
+		while (i == -1)
+			i = ps2_keyb_getbyte ();
+
+	// grab the first keypress
+	buf[count++] = i;
+	terminal_printchar(i);
+
+	// grab keys while less than buffer length and available
+	while (count < len) {
+
+		i = ps2_keyb_getbyte ();
+
+		// block to wait for more characters
+		if (i == -1)
+			while (i == -1)
+				i = ps2_keyb_getbyte();
+
+		if (i == '\r')
+			break;
+
+		else if (i == '\b') {
+			count--;
+		}
+
+		else {
+
+			buf[count++] = i;
+		}
+
+		terminal_printchar(i);
+	}
+
+	buf[count] = '\0';
+	return count;
+}
+
+// write to the boot time TTY device
+ssize_t kernel_tty_write (char *buf, size_t len) {
+}
+
 // int terminal_initialize (): Initialize the VGA display
 int terminal_initialize () {
 
+	// set up the terminal
 	_curX = _curY = 0;
 	color_attrib = VGA_VIDEO_DEFCOLOR;
 	video_memory = (uint16_t *) VGA_VIDEO_MEMORY;
+
+	// initialize the driver
+	register_chrdev (0, "/dev/tty0", &tty_ops);
 
 	return VGA_VIDEO_ROWS*VGA_VIDEO_COLUMNS;
 }
@@ -38,7 +117,7 @@ int terminal_initialize () {
 int terminal_printchar (int c) {
 
 	// is our character a linefeed character?
-	if (c == '\n') {
+	if (c == '\n' || c == '\r') {
 
 		_curX = 0;
 		_curY++;
@@ -48,6 +127,14 @@ int terminal_printchar (int c) {
 			terminal_scroll ();
 			_curY--;
 		}
+	}
+
+	// is it a backspace?
+	else if (c == '\b') {
+
+		_curX--;
+		terminal_printchar(0x20);
+		_curX--;
 	}
 
 	// on tabs, write out four spaces
@@ -77,6 +164,7 @@ int terminal_printchar (int c) {
 		}
 	}
 
+	terminal_updatecursor();
 	return c;
 }
 
@@ -88,7 +176,7 @@ int terminal_puts (const char *str) {
 	while (*s)
 		terminal_printchar (*s++);
 
-	terminal_printchar ('\n');
+	terminal_printchar ('\r');
 
 	return (int)((s - (unsigned char *)(str)) + 1);
 }
@@ -218,4 +306,14 @@ void terminal_setloc (int x, int y) {
 
 	_curX = x;
 	_curY = y;
+}
+
+void terminal_updatecursor () {
+
+	uint16_t cursor_loc = (uint16_t) (_curY*80)+_curX;
+
+	outportb(0x3d4, 0x0f);
+	outportb(0x3d5, (unsigned char) cursor_loc&0xff);
+	outportb(0x3d4, 0x0e);
+	outportb(0x3d5, (unsigned char) (cursor_loc>>8)&0xff);
 }
