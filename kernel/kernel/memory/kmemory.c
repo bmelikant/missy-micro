@@ -6,12 +6,11 @@
  */
 
 // kernel private includes
-#include "../include/kmemory.h"
-
 #include <errno.h>
 #include <include/exception.h>
 #include <include/multiboot.h>
 #include <include/balloc.h>
+#include <include/kmemory.h>
 
 // kernel public includes
 #include <kernel/tty.h>
@@ -39,6 +38,8 @@ void *kheap_base = NULL;
 // inputs: none
 // returns: none (may halt system on error)
 void kmemory_initialize () {
+
+	terminal_puts("Kernel memory manager is starting up...");
 
 	// get the memory size from multiboot and turn it into bytes from Kb
 	unsigned int mem_sz = multiboot_get_memsz()*1024;
@@ -152,4 +153,50 @@ void *kspace_sbrk (size_t increment) {
 	}
 
 	return old_brk;
+}
+
+// void *kernel_request_mapping(): Request a mapping to a virtual page for a physical address
+// inputs: addr_phys - the physical address to map, size_t blocks - number of 4K blocks to map
+// returns: NULL on error, virtual address on success
+void *kernel_request_temp_mapping (void *addr_phys, size_t blocks) {
+
+	// check for a free mapping beyond the kernel heap of sufficient size
+	uint32_t free_mapping = (uint32_t) kheap_last_page+KERNEL_PAGE_SIZE;
+	void *return_val = (void *) free_mapping;
+
+	// try to map the space in
+	for (size_t i = 0; i < blocks; i++) {
+
+		// roll back changes to the page table on failure
+		if (vmmngr_map_page(addr_phys, free_mapping) == -1 && i > 0) {
+
+			for (size_t j = i-1; j > 0; j--) {
+
+				vmmngr_unmap_page(free_mapping);
+				free_mapping -= KERNEL_PAGE_SIZE;
+			}
+
+			errno = ENOMEM;
+			return NULL;
+		}
+
+		// otherwise increment the page and do the next one!
+		free_mapping += KERNEL_PAGE_SIZE;
+	}
+
+	return return_val;
+}
+
+// void kernel_release_temp_mapping(): Release a temporary mapping
+// inputs: void *addr_virt - virtual address to release
+// returns: none
+void kernel_release_temp_mapping(void *addr_virt, size_t blocks) {
+
+	uint32_t unmap = (uint32_t) addr_virt;
+
+	for (size_t i = 0; i < blocks; i++) {
+
+		vmmngr_unmap_page(unmap);
+		unmap += KERNEL_PAGE_SIZE;
+	}
 }

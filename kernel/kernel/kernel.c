@@ -76,7 +76,7 @@ void kernel_main () {
 }
 
 // int kernel_early_init (): Initialize the kernel (before calls to any C runtime)
-// inputs: *mboot: Multiboot header information
+// inputs: *mboot: Multiboot header information (supports multiboot2 as of last commit to master)
 // returns: -1 on error, 0 on success
 int kernel_early_init (void *mb_inf, unsigned int mboot_magic) {
 
@@ -114,7 +114,11 @@ int kernel_early_init (void *mb_inf, unsigned int mboot_magic) {
 	// if the RSDT is in identity-mapped memory we are okay
 	// otherwise, we have to map it into memory
 	terminal_printf ("The RSDT is located at physical address 0x%x\n", (unsigned int) acpi_table->rsdt_addr);
-	
+
+	// acpi build stop point
+	cpu_disable();
+	for (;;);
+
 	// everything is set up, return!
 	return 0;
 }

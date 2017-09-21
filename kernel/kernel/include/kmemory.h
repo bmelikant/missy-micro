@@ -55,4 +55,8 @@ void *kernel_alloc 		(size_t nunits);
 void *kernel_realloc 	(size_t nunits);
 void kernel_free		(void *mblock);
 
+// request a physical to virtaul mapping
+void *kernel_request_temp_mapping(void *addr_physical, size_t blocks);
+void kernel_release_temp_mapping(void *addr_virt, size_t blocks);
+
 #endif /* MISSY_KERNEL_MEMORY_H_ */

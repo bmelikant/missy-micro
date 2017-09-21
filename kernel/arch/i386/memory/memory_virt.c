@@ -7,13 +7,14 @@
  */
 
 // kernel includes
-#include "../include/memory_virt.h"
+#include <include/balloc.h>
+#include <i386/include/memory_virt.h>
 
+// standard includes
 #include <stdio.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <string.h>
-#include "../../../kernel/include/balloc.h"
 
 #ifndef _cplusplus
 #include <stdbool.h>

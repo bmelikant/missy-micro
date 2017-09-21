@@ -13,6 +13,7 @@
 
 // kernel private includes
 #include <include/acpi.h>
+#include <include/kmemory.h>
 
 #define EDBA_SEGMENT_LOC 0x40E
 #define EDBA_MAX_SEEK	 1024
@@ -71,4 +72,25 @@ unsigned char acpi_get_checksum (RSDP_Descriptor *rsdp) {
 		result += (unsigned int) *(acpi_byte+i);
 
 	return (unsigned char) result;
+}
+
+// locate a table within the ACPI tables
+void *locate_acpi_table (const char tablename[4], RSDP_Descriptor *rsdp) {
+
+	// for ACPI revision 2, use the XDST. Otherwise, use RDST
+	if (rsdp->revision > 0) {
+
+	}
+
+	// grab the physical address of the RDST, and align to 4KB for mapping
+	else {
+
+		void *rdst_phys_block = (void *) (rsdp->address &~ 0xfff);
+		void *rdst_virt_block = kernel_request_temp_mapping(rdst_phys_block, 1);
+
+		// offset into the block
+		ACPI_SDTHeader *rdst = (ACPI_SDTHeader *)(rdst_virt_block + (rsdp->address & 0xfff));
+
+		
+	}
 }

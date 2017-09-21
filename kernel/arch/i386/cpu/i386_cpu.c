@@ -221,7 +221,6 @@ void cpu_reset () {
 // void cpu_setvector (): Set an interrupt vector up
 void cpu_setvector (int vector, void *addr) {
 
-	terminal_printf ("Setting cpu vector 0x%x\n", (uint8_t)(vector));
 	i386_idt_setvector ((uint8_t) vector, (uint32_t)(addr), 0x08, (uint8_t) (I386_IDT_INTERRUPTGATE_32 | I386_IDT_PRESENT | I386_IDT_RING0));
 }
 
