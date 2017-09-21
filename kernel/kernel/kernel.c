@@ -115,6 +115,10 @@ int kernel_early_init (void *mb_inf, unsigned int mboot_magic) {
 	// otherwise, we have to map it into memory
 	terminal_printf ("The RSDT is located at physical address 0x%x\n", (unsigned int) acpi_table->rsdt_addr);
 
+	// try to locate the table and print its physical address
+	void *fadt = locate_acpi_table("FACP", (void *) acpi_table);
+	terminal_printf ("This is where the FADT was reported to be: 0x%x\n", (unsigned int) fadt);
+
 	// acpi build stop point
 	cpu_disable();
 	for (;;);

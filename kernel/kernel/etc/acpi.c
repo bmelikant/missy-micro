@@ -77,20 +77,35 @@ unsigned char acpi_get_checksum (RSDP_Descriptor *rsdp) {
 // locate a table within the ACPI tables
 void *locate_acpi_table (const char tablename[4], RSDP_Descriptor *rsdp) {
 
-	// for ACPI revision 2, use the XDST. Otherwise, use RDST
+	// for ACPI revision 2, use the XDST. Otherwise, use rsdt
 	if (rsdp->revision > 0) {
 
 	}
 
-	// grab the physical address of the RDST, and align to 4KB for mapping
+	// grab the physical address of the rsdt, and align to 4KB for mapping
 	else {
 
-		void *rdst_phys_block = (void *) (rsdp->address &~ 0xfff);
-		void *rdst_virt_block = kernel_request_temp_mapping(rdst_phys_block, 1);
+		void *rsdt_phys_block = (void *) (rsdp->rsdt_addr &~ 0xfff);
+		void *rsdt_virt_block = kernel_request_temp_mapping(rsdt_phys_block, 1);
 
 		// offset into the block
-		ACPI_SDTHeader *rdst = (ACPI_SDTHeader *)(rdst_virt_block + (rsdp->address & 0xfff));
+		ACPI_SDTHeader *rsdt = (ACPI_SDTHeader *)(rsdt_virt_block + (rsdp->rsdt_addr & 0xfff));
+		terminal_printf ("Reading data from 0x%x, virtual block is 0x%x, physical is 0x%x\n",
+				(unsigned int) rsdt, (unsigned int) rsdt_virt_block, (unsigned int) rsdt_phys_block);
 
-		
+		// sub-loop - check each header entry for the correct table
+		while (((unsigned int) rsdt &~ 0xfff) == rsdt_virt_block) {
+
+			//terminal_printf("Checking entry at 0x%x\n", (unsigned int) rsdt);
+			//for (int i = 0; i < 4; i++)
+				//terminal_printchar(rsdt->signature[i]);
+
+			if (!strncmp(rsdt->signature, tablename, 4))
+				return (void *)(rsdt_phys_block+((unsigned int) rsdt_virt_block & 0xfff));
+
+			rsdt += rsdt->length;		// move to the next entry
+		}
 	}
+
+	return NULL;
 }
