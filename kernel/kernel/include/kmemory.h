@@ -55,6 +55,9 @@ void *kernel_alloc 		(size_t nunits);
 void *kernel_realloc 	(size_t nunits);
 void kernel_free		(void *mblock);
 
+void *kernel_alloc_physical(size_t blocks);
+void kernel_free_physical(void *phys, size_t blocks);
+
 // request a physical to virtaul mapping
 void *kernel_request_temp_mapping(void *addr_physical, size_t blocks);
 void kernel_release_temp_mapping(void *addr_virt, size_t blocks);

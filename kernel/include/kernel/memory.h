@@ -12,6 +12,8 @@
 #include <i386/include/memory_virt.h>
 #endif
 
+#include <include/kmemory.h>
+
 // memory space structure
 typedef struct MEMORY_SPACE {
 

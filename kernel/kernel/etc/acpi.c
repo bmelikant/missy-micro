@@ -96,14 +96,16 @@ void *locate_acpi_table (const char tablename[4], RSDP_Descriptor *rsdp) {
 		// sub-loop - check each header entry for the correct table
 		while (((unsigned int) rsdt &~ 0xfff) == rsdt_virt_block) {
 
-			//terminal_printf("Checking entry at 0x%x\n", (unsigned int) rsdt);
-			//for (int i = 0; i < 4; i++)
-				//terminal_printchar(rsdt->signature[i]);
+			terminal_printf("Checking entry at 0x%x\n", (unsigned int) rsdt);
+			for (int i = 0; i < 4; i++)
+				terminal_printchar(rsdt->signature[i]);
 
 			if (!strncmp(rsdt->signature, tablename, 4))
-				return (void *)(rsdt_phys_block+((unsigned int) rsdt_virt_block & 0xfff));
+				return (void *)(rsdt_phys_block+((unsigned int) rsdt & 0xfff));
 
-			rsdt += rsdt->length;		// move to the next entry
+			terminal_printf("Added %d to rsdt pointer", rsdt->length);
+			rsdt = (ACPI_SDTHeader *) ((unsigned int) rsdt + rsdt->length);		// move to the next entry
+			for (;;);
 		}
 	}
 

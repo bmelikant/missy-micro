@@ -40,12 +40,12 @@ struct RSDP_DESCRIPTOR_2 {
 // System Descriptor table header
 struct ACPI_SDT_HEADER {
 
-	char signature[4];				// tells with which table we are working
+	uint8_t signature[4];				// tells with which table we are working
 	uint32_t length;				// length of the table
 	uint8_t revision;
 	uint8_t checksum;				// checksum for the table. All bytes must sum to 0%0xff
-	char oem_id[6];
-	char oem_tbl_id[8];
+	uint8_t oem_id[6];
+	uint8_t oem_tbl_id[8];
 	uint32_t oem_revision;
 	uint32_t creator_id;
 	uint32_t creator_revision;

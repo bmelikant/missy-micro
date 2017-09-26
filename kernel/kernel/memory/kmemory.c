@@ -200,3 +200,17 @@ void kernel_release_temp_mapping(void *addr_virt, size_t blocks) {
 		unmap += KERNEL_PAGE_SIZE;
 	}
 }
+
+// void *kernel_alloc_physical(): Allocate blocks of physical memory (gives out 4Kb chunks)
+// inputs: blocks - the number of 4Kb blocks to allocate
+// returns: a (physical!) pointer to the block of memory
+void *kernel_alloc_physical(size_t blocks) {
+	return balloc_get_n(blocks);
+}
+
+// void kernel_free_physical(): Free blocks of physical memory
+// inputs: blocks - the number of blocks allocated by kernel_alloc_physical()
+// returns: none
+void kernel_free_physical(void *phys, size_t blocks) {
+	balloc_free_n(phys, blocks);
+}

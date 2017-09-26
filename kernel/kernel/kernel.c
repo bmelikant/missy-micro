@@ -37,6 +37,7 @@
 // kernel public includes (needed by / contained in libk)
 #include <kernel/tty.h>
 #include <kernel/device.h>
+#include <kernel/process.h>
 
 // kernel private includes
 #include <include/multiboot.h>
@@ -71,7 +72,9 @@ void kernel_main () {
 		kernel_command_line();
 	}
 
+	cpu_disable();
 	for (;;);
+
 	__builtin_unreachable ();
 }
 
@@ -113,11 +116,15 @@ int kernel_early_init (void *mb_inf, unsigned int mboot_magic) {
 
 	// if the RSDT is in identity-mapped memory we are okay
 	// otherwise, we have to map it into memory
-	terminal_printf ("The RSDT is located at physical address 0x%x\n", (unsigned int) acpi_table->rsdt_addr);
+	//terminal_printf ("The RSDT is located at physical address 0x%x\n", (unsigned int) acpi_table->rsdt_addr);
 
 	// try to locate the table and print its physical address
-	void *fadt = locate_acpi_table("FACP", (void *) acpi_table);
-	terminal_printf ("This is where the FADT was reported to be: 0x%x\n", (unsigned int) fadt);
+	//void *fadt = locate_acpi_table("FACP", (void *) acpi_table);
+	//terminal_printf ("This is where the FADT was reported to be: 0x%x\n", (unsigned int) fadt);
+
+	// this is to try to allocate a new process!
+	unsigned long pid = create_user_process(NULL);
+	terminal_printf("I spawned a new process with pid=0x%x\n", (unsigned int) pid);
 
 	// acpi build stop point
 	cpu_disable();

@@ -27,6 +27,8 @@ typedef uint32_t ptable_entry;
 typedef uint32_t phys_addr;
 typedef uint32_t virt_addr;
 
+#define PAGE_DIRECTORY_SIZE 0x1000
+
 #endif
 
 
