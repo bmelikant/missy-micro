@@ -34,7 +34,7 @@ typedef uint32_t virt_addr;
 
 /* platform-independent vmmngr routines */
 
-int vmmngr_initialize ();
+int vmmngr_initialize (uint32_t kernel_start, size_t kernel_total_sz);
 
 // create and delete address spaces, and switch to different address spaces
 int vmmngr_create_address_space 	(pdirectory *pdir);

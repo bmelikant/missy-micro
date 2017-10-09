@@ -22,7 +22,6 @@
 #include <include/balloc.h>
 
 // constant definitions
-#define MEMORY_BLOCK_SIZE		4096
 #define BLOCKS_PER_UNIT			32
 #define BLOCK_UNIT_FULL			0xffffffff
 #define LOGICAL_ADDRESS_ADJUST	0xbff00000
@@ -39,6 +38,8 @@ unsigned int *m_bmp = NULL;
 unsigned int mem_sz = 0, bmp_sz = 0;
 
 static unsigned int total_blocks = 0, free_blocks = 0;
+static unsigned int kernel_total_sz = 0;
+static unsigned int kstart_phys = 0;
 
 /* internal function declarations */
 
@@ -54,11 +55,13 @@ unsigned int balloc_initialize (unsigned int memory_sz) {
 
 	// compute the size of the kernel
 	unsigned int kernel_sz = (unsigned int)(&kernel_end) - (unsigned int)(&kernel_start);
-	unsigned int kstart_phys = (unsigned int)(&kernel_start) - LOGICAL_ADDRESS_ADJUST;
+	kstart_phys = (unsigned int)(&kernel_start) - LOGICAL_ADDRESS_ADJUST;
 
 	// place the memory bitmap at the end of the kernel
 	mem_sz = memory_sz;
 	m_bmp = ((unsigned int *)(&kernel_start)) + kernel_sz;
+	printf("The kernel ends at 0x%x, and the bitmap starts at 0x%x\n",
+		(unsigned int)(&kernel_end), (unsigned int)m_bmp);
 
 	// set up the number of blocks in the system
 	total_blocks = (unsigned int)(memory_sz / MEMORY_BLOCK_SIZE);
@@ -72,11 +75,13 @@ unsigned int balloc_initialize (unsigned int memory_sz) {
 		m_bmp[i] = 0x0;
 
 	// compute the end of the memory bitmap address
-	unsigned int kernel_total_sz = (unsigned int) kernel_sz + (bmp_sz*BLOCKS_PER_UNIT);
+	kernel_total_sz = (unsigned int) kernel_sz + (bmp_sz*BLOCKS_PER_UNIT);
 
 	// make sure the region occupied by the kernel and bitmap are not given out
 	balloc_init_region (0x0, 0x100000);
 	balloc_init_region (kstart_phys, kernel_total_sz);
+
+	printf("Kernel size: %d\n", kernel_total_sz);
 
 	return total_blocks;
 }
@@ -147,8 +152,13 @@ void *balloc_get_n (size_t n) {
 	if (!blk)
 		return NULL;
 
-	for (size_t i = 0; i < n; i++)
+	printf("Block: %d\n", blk);
+
+	for (size_t i = 0; i < n; i++) {
+
+		printf("Setting block: %d\n");
 		memory_bitmap_set(blk+i);
+	}
 
 	free_blocks -= n;
 	return (void *)(blk*MEMORY_BLOCK_SIZE);
@@ -188,6 +198,9 @@ unsigned int balloc_total_block_count () { return total_blocks; }
 
 unsigned int balloc_total_memory () { return total_blocks * MEMORY_BLOCK_SIZE; }
 unsigned int balloc_free_memory  () { return free_blocks * MEMORY_BLOCK_SIZE;  }
+
+unsigned int balloc_kernel_size () { return kernel_total_sz; }
+unsigned int balloc_kernel_start () { return kstart_phys; }
 
 /* Internal functions */
 

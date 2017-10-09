@@ -19,6 +19,7 @@
 #endif
 
 #include <include/multiboot.h>
+#include <include/balloc.h>
 
 #ifdef __arch_i386
 #include <i386/include/memory_virt.h>

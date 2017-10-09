@@ -7,6 +7,8 @@ extern "C" {
 
 #include <stddef.h>
 
+#define MEMORY_BLOCK_SIZE		4096
+
 // block allocation routines
 
 unsigned int balloc_initialize (unsigned int mem_sz);
@@ -26,6 +28,9 @@ unsigned int balloc_total_block_count 	();
 
 unsigned int balloc_total_memory 	();
 unsigned int balloc_free_memory		();
+
+unsigned int balloc_kernel_size ();
+unsigned int balloc_kernel_start ();
 
 #ifdef _cplusplus
 }

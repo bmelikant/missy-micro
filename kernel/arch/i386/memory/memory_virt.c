@@ -50,6 +50,8 @@
 #define I386_PTABLE_SIZE	(I386_BLOCK_SIZE*1024)
 #define I386_PDIR_SIZE		(I386_PTABLE_SIZE*1024)
 
+#define KERNEL_VIRTUAL_BASE 0xC0000000
+
 // structures
 
 struct pg_inf {
@@ -75,7 +77,7 @@ static inline pdirectory *i386_get_pdbr (void) { pdirectory *pdir = NULL; __asm_
 // int vmmngr_initialize (): Initialize the address space manager
 // inputs: none
 // returns: 0 on success, nonzero on failure (sets errno)
-int vmmngr_initialize () {
+int vmmngr_initialize (uint32_t kernel_start_phys, size_t kernel_total_sz) {
 
 	// we must set up a new page directory when we enable paging
 	pdirectory *new_pdir_phys = (pdirectory *) balloc_get ();
@@ -103,6 +105,15 @@ int vmmngr_initialize () {
 	// now point the physical page directory to it's virtual address and unmap the temporary page
 	pdir_virtual = (pdirectory *) 0xfffff000;
 	vmmngr_unmap_page ((virt_addr) new_pdir_virt);
+
+	// since the block allocator broke, we clearly didn't map enough memory for the kernel
+	// we should probably map some more here...
+	size_t kernel_blocks = (kernel_total_sz / PAGE_DIRECTORY_SIZE) + 1;
+	printf("Kernel size (in vmmngr blocks): %d\n", kernel_blocks);
+
+	// map in all the kernel blocks!
+	//for (size_t i = 0; i < kernel_blocks; i++)
+	//	vmmngr_map_page((phys_addr) (kernel_start_phys + (i*PAGE_DIRECTORY_SIZE)), (virt_addr) (KERNEL_VIRTUAL_BASE + (i*PAGE_DIRECTORY_SIZE)));
 
 	return 0;
 }

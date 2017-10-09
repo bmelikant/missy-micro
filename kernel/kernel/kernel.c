@@ -126,6 +126,13 @@ int kernel_early_init (void *mb_inf, unsigned int mboot_magic) {
 	unsigned long pid = create_user_process(NULL);
 	terminal_printf("I spawned a new process with pid=0x%x\n", (unsigned int) pid);
 
+	// try to give the process a stack of 1 block
+	initialize_stack(pid, 4096);
+	terminal_printf("I gave the process a stack of 4096 bytes\n");
+
+	delete_user_process(pid);
+	terminal_puts("And now I crushed it. Mwahahahaha!!!");
+
 	// acpi build stop point
 	cpu_disable();
 	for (;;);

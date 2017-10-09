@@ -62,7 +62,7 @@ void kmemory_initialize () {
 
 	} while (multiboot_get_mmap_next (&map_entry));
 
-	if (vmmngr_initialize () == -1)
+	if (vmmngr_initialize (balloc_kernel_start(), balloc_kernel_size()) == -1)
 		kernel_panic ("Virtual memory subsystem failed to initialize!");
 
 	terminal_puts ("Done!");

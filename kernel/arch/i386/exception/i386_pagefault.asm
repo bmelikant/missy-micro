@@ -17,7 +17,7 @@ i386_pagefault:
 	pop dword [int_pfErrorCode]
 	pushad
 
-	call i386_exception_set_disp
+	; call i386_exception_set_disp
 
 	push str_PageFault
 	push dword [int_ExceptionNumber]
