@@ -2,3 +2,5 @@
 isodir
 sysroot
 kernel-layout
+.vscode
+.obsolete
