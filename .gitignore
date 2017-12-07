@@ -1,3 +1,6 @@
 *.iso
 isodir
 sysroot
+.obsolete/
+.vscode/
+./kernel/missy*
