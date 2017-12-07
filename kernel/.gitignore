@@ -2,3 +2,4 @@
 *.kernel
 *.o
 missy_os
+missy_dump
