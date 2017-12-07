@@ -3,4 +3,5 @@ isodir
 sysroot
 .obsolete/
 .vscode/
-./kernel/missy*
+./kernel/missy_os
+./kernel/missy_dump
